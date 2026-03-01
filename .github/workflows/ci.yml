@@ -14,13 +14,10 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout tap-go
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Clone go-didcomm
-        run: git clone --depth 1 https://github.com/Notabene-id/go-didcomm.git ../go-didcomm
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -40,11 +37,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout tap-go
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Clone go-didcomm
-        run: git clone --depth 1 https://github.com/Notabene-id/go-didcomm.git ../go-didcomm
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -61,11 +55,8 @@ jobs:
     name: Vulncheck
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout tap-go
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Clone go-didcomm
-        run: git clone --depth 1 https://github.com/Notabene-id/go-didcomm.git ../go-didcomm
 
       - name: Set up Go
         uses: actions/setup-go@v5
