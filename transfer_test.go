@@ -9,8 +9,8 @@ import (
 
 func TestNewTransferMessage(t *testing.T) {
 	body := &TransferBody{
-		Asset:  "eip155:1/slip44:60",
-		Amount: "1.23",
+		Asset:      "eip155:1/slip44:60",
+		Amount:     "1.23",
 		Originator: &Party{ID: "did:eg:bob"},
 		Agents: []Agent{
 			{ID: "did:web:originator.vasp", For: NewForField("did:eg:bob")},

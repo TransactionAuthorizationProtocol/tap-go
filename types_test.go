@@ -150,7 +150,7 @@ func TestTransactionConstraints_JSONRoundTrip(t *testing.T) {
 			{ID: "did:example:vendor-1", Name: "Approved Vendor 1"},
 		},
 		AllowedSettlementAddresses: []string{"eip155:1:0x742d35Cc6e4dfE2eDFaD2C0b91A8b0780EDAEb58"},
-		AllowedAssets:             []string{"eip155:1/slip44:60"},
+		AllowedAssets:              []string{"eip155:1/slip44:60"},
 	}
 
 	data, err := json.Marshal(tc)

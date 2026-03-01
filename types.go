@@ -110,12 +110,12 @@ type Policy struct {
 
 // TransactionConstraints defines boundaries for transactions in a connection.
 type TransactionConstraints struct {
-	Purposes                  []string `json:"purposes,omitempty"`
-	CategoryPurposes          []string `json:"categoryPurposes,omitempty"`
-	Limits                    *Limits  `json:"limits,omitempty"`
-	AllowedBeneficiaries      []Party  `json:"allowedBeneficiaries,omitempty"`
+	Purposes                   []string `json:"purposes,omitempty"`
+	CategoryPurposes           []string `json:"categoryPurposes,omitempty"`
+	Limits                     *Limits  `json:"limits,omitempty"`
+	AllowedBeneficiaries       []Party  `json:"allowedBeneficiaries,omitempty"`
 	AllowedSettlementAddresses []string `json:"allowedSettlementAddresses,omitempty"`
-	AllowedAssets             []string `json:"allowedAssets,omitempty"`
+	AllowedAssets              []string `json:"allowedAssets,omitempty"`
 }
 
 // Limits defines financial limits for transactions.
@@ -130,19 +130,19 @@ type Limits struct {
 
 // Invoice represents a structured invoice for payment information.
 type Invoice struct {
-	ID                          string               `json:"id"`
-	IssueDate                   string               `json:"issueDate"`
-	CurrencyCode                string               `json:"currencyCode"`
-	LineItems                   []LineItem            `json:"lineItems"`
-	Total                       float64              `json:"total"`
-	SubTotal                    *float64             `json:"subTotal,omitempty"`
-	TaxTotal                    *TaxTotal            `json:"taxTotal,omitempty"`
-	DueDate                     string               `json:"dueDate,omitempty"`
-	Note                        string               `json:"note,omitempty"`
-	PaymentTerms                string               `json:"paymentTerms,omitempty"`
-	AccountingCost              string               `json:"accountingCost,omitempty"`
-	OrderReference              *OrderReference      `json:"orderReference,omitempty"`
-	AdditionalDocumentReference []DocumentReference  `json:"additionalDocumentReference,omitempty"`
+	ID                          string              `json:"id"`
+	IssueDate                   string              `json:"issueDate"`
+	CurrencyCode                string              `json:"currencyCode"`
+	LineItems                   []LineItem          `json:"lineItems"`
+	Total                       float64             `json:"total"`
+	SubTotal                    *float64            `json:"subTotal,omitempty"`
+	TaxTotal                    *TaxTotal           `json:"taxTotal,omitempty"`
+	DueDate                     string              `json:"dueDate,omitempty"`
+	Note                        string              `json:"note,omitempty"`
+	PaymentTerms                string              `json:"paymentTerms,omitempty"`
+	AccountingCost              string              `json:"accountingCost,omitempty"`
+	OrderReference              *OrderReference     `json:"orderReference,omitempty"`
+	AdditionalDocumentReference []DocumentReference `json:"additionalDocumentReference,omitempty"`
 }
 
 // LineItem represents an individual item in an invoice.
@@ -194,7 +194,7 @@ type DocumentReference struct {
 
 // Relationship represents a relationship between parties for ConfirmRelationship.
 type Relationship struct {
-	Type            string `json:"type"`
+	Type            string  `json:"type"`
 	Parties         []Party `json:"parties"`
 	EstablishedDate string  `json:"establishedDate,omitempty"`
 	Reference       string  `json:"reference,omitempty"`
