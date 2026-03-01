@@ -1,0 +1,3 @@
+[submodule "TAIPs"]
+	path = TAIPs
+	url = https://github.com/TransactionAuthorizationProtocol/TAIPs.git
