@@ -83,7 +83,7 @@ Each message file follows the same pattern:
 
 ### Dependencies
 
-- `github.com/Notabene-id/go-didcomm` — DIDComm v2 (`Message`, `Client`, resolvers). Uses local replace directive.
+- `github.com/Notabene-id/go-didcomm` — DIDComm v2 (`Message`, `Client`, resolvers)
 - `github.com/google/uuid` — message ID generation
 
 ### Test vectors
@@ -101,3 +101,9 @@ The `Agent.For` field uses `ForField` type, which handles JSON marshaling of bot
 - All body structs must have `Context` (`@context`) and `Type` (`@type`) fields, set automatically by constructors
 - Thread-based messages (replies) take a `thid` parameter; initiating messages do not
 - Test files include: JSON round-trip, constructor validation (required fields), `ParseBody` dispatch, and test vector loading where available
+
+## Documentation requirements
+
+- **CHANGELOG.md** — Maintain a `CHANGELOG.md` in the project root using [Keep a Changelog](https://keepachangelog.com/) format. Update it with every user-facing change (new features, bug fixes, breaking changes, dependency updates). Group entries under `Added`, `Changed`, `Fixed`, `Removed` sections within version headings.
+- **README.md** — Update `README.md` whenever changes affect public API, usage examples, installation instructions, or project capabilities.
+- **CLAUDE.md** — Update this file whenever changes affect architecture, file layout, commands, dependencies, or development guidelines (e.g., new message types added to the file layout table, new commands, changed patterns).
