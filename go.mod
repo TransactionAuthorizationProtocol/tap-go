@@ -3,7 +3,7 @@ module github.com/TransactionAuthorizationProtocol/tap-go
 go 1.26.0
 
 require (
-	github.com/Notabene-id/go-didcomm v0.1.0
+	github.com/Notabene-id/go-didcomm v0.2.0
 	github.com/google/uuid v1.6.0
 )
 

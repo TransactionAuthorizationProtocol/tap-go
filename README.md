@@ -4,8 +4,16 @@ Go library for the [Transaction Authorization Protocol (TAP)](https://tap.rsvp) 
 
 ## Installation
 
+### Library
+
 ```bash
 go get github.com/TransactionAuthorizationProtocol/tap-go
+```
+
+### CLI
+
+```bash
+go install github.com/TransactionAuthorizationProtocol/tap-go/cmd/tap@latest
 ```
 
 ## How It Works
@@ -274,6 +282,67 @@ tap.AllTypes() // []string (20 types)
 body, err := tap.ParseBody(msg) // (TAPBody, error)
 body.TAPType() // e.g. "https://tap.rsvp/schema/1.0#Transfer"
 ```
+
+## CLI
+
+The `tap` CLI wraps all [go-didcomm](https://github.com/Notabene-id/go-didcomm) CLI commands and adds TAP-specific message creation and receiving.
+
+### Commands
+
+```
+tap did generate-key [--output-dir <dir>]
+tap did generate-web --domain <d> [--path <p>] [--service-endpoint <url>] [--output-dir <dir>]
+tap pack signed    --key-file <f> [--send] [--did-doc <f>] [--message <m>]
+tap pack anoncrypt [--send] [--did-doc <f>] [--message <m>]
+tap pack authcrypt --key-file <f> [--send] [--did-doc <f>] [--message <m>]
+tap unpack         --key-file <f> [--did-doc <f>] [--message <m>]
+tap send           --to <url> [--message <m>]
+tap message <type> --from <did> --to <did> [--thid <id>] [--body <json>]
+tap receive        --key-file <f> [--did-doc <f>] [--message <m>]
+```
+
+### Create and pack a TAP message
+
+```bash
+# Generate identities
+tap did generate-key --output-dir alice
+tap did generate-key --output-dir bob
+
+ALICE=$(jq -r .id alice/did-doc.json)
+BOB=$(jq -r .id bob/did-doc.json)
+
+# Create a TAP transfer message
+tap message transfer --from $ALICE --to $BOB \
+  --body '{"asset":"eip155:1/slip44:60","amount":"1.5","agents":[{"@id":"'$ALICE'","role":"OriginatingVASP"}]}'
+
+# Pipe: create → pack → send
+tap message transfer --from $ALICE --to $BOB --body @body.json | \
+  tap pack authcrypt --key-file alice/keys.json
+```
+
+### Receive a TAP message
+
+```bash
+# Unpack a DIDComm envelope and parse the TAP body
+echo '<packed-message>' | tap receive --key-file bob/keys.json
+```
+
+The `receive` command outputs JSON with the unpacked message, typed body, and envelope metadata (`encrypted`, `signed`, `anonymous`).
+
+### TAP message types
+
+**Initiating (no `--thid`):** `transfer`, `payment`, `exchange`, `escrow`, `connect`
+
+**Reply (require `--thid`):** `authorize`, `authorization-required`, `settle`, `reject`, `cancel`, `revert`, `capture`, `quote`, `add-agents`, `remove-agent`, `replace-agent`, `update-agent`, `update-party`, `update-policies`, `confirm-relationship`
+
+### Body input (`--body` flag)
+
+- `'{"json"}'` — inline JSON string
+- `@file.json` — read from file
+- `-` — read from stdin
+- _(omitted)_ — defaults to `{}`
+
+The body JSON should contain only message-specific fields (e.g. `asset`, `amount`, `agents`). The CLI automatically sets `@context` and `@type`.
 
 ## Error Handling
 

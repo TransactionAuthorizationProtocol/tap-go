@@ -10,13 +10,13 @@ import (
 
 // ConfirmRelationshipBody represents the body of a TAP ConfirmRelationship message (TAIP-9).
 type ConfirmRelationshipBody struct {
-	Context    string        `json:"@context"`
-	Type       string        `json:"@type"`
+	Context      string        `json:"@context"`
+	Type         string        `json:"@type"`
 	Relationship *Relationship `json:"relationship"`
-	Status     string        `json:"status"`
-	ValidFrom  string        `json:"validFrom,omitempty"`
-	ValidUntil string        `json:"validUntil,omitempty"`
-	Details    any           `json:"details,omitempty"`
+	Status       string        `json:"status"`
+	ValidFrom    string        `json:"validFrom,omitempty"`
+	ValidUntil   string        `json:"validUntil,omitempty"`
+	Details      any           `json:"details,omitempty"`
 }
 
 func (b *ConfirmRelationshipBody) TAPType() string { return TypeConfirmRelationship }

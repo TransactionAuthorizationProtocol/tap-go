@@ -17,8 +17,11 @@ go test -race -coverprofile=coverage.out ./...
 # Run a single test
 go test -run TestNewTransferMessage ./...
 
-# Build
+# Build library
 go build ./...
+
+# Build CLI
+go build ./cmd/tap/
 
 # Vet
 go vet ./...
@@ -30,7 +33,7 @@ This is a Go library that provides typed wrappers for all 20 TAP (Transaction Au
 
 ### Package structure
 
-Single flat `tap` package — all types and helpers in the root. One file per message type.
+Single flat `tap` package — all types and helpers in the root. One file per message type. CLI binary at `cmd/tap/`.
 
 ### Key types
 
@@ -94,6 +97,18 @@ Test vectors from `TAIPs/test-vectors/` are loaded in tests. The `TAIPs` directo
 
 The `Agent.For` field uses `ForField` type, which handles JSON marshaling of both single DID strings and arrays of DIDs. Use `NewForField("did:eg:alice")` or `NewForField("did:eg:alice", "did:eg:bob")`.
 
+## Pre-push checklist
+
+**Always run formatting, linter, and tests locally before committing/pushing:**
+
+```bash
+go fmt ./...
+golangci-lint run ./...
+go test ./...
+```
+
+Fix any issues before committing. CI runs linter and tests and will block the PR if either fails.
+
 ## Development guidelines
 
 - Every new message type needs: body struct, `TAPType()`, `New*Message()` constructor, a case in `ParseBody()`, and a matching `_test.go`
@@ -107,3 +122,37 @@ The `Agent.For` field uses `ForField` type, which handles JSON marshaling of bot
 - **CHANGELOG.md** — Maintain a `CHANGELOG.md` in the project root using [Keep a Changelog](https://keepachangelog.com/) format. Update it with every user-facing change (new features, bug fixes, breaking changes, dependency updates). Group entries under `Added`, `Changed`, `Fixed`, `Removed` sections within version headings.
 - **README.md** — Update `README.md` whenever changes affect public API, usage examples, installation instructions, or project capabilities.
 - **CLAUDE.md** — Update this file whenever changes affect architecture, file layout, commands, dependencies, or development guidelines (e.g., new message types added to the file layout table, new commands, changed patterns).
+
+## CLI (`cmd/tap/`)
+
+The `tap` binary wraps all go-didcomm CLI commands and adds TAP-specific `message` and `receive` commands.
+
+### CLI file layout
+
+| File | Purpose |
+|------|---------|
+| `cmd/tap/main.go` | Entry point, command routing, usage text |
+| `cmd/tap/message.go` | `message <type>` command — creates all 20 TAP message types |
+| `cmd/tap/receive.go` | `receive` command — unpacks DIDComm envelope + parses TAP body |
+| `cmd/tap/message_test.go` | Tests for message creation (all types, validation, file input) |
+| `cmd/tap/receive_test.go` | Tests for receive (signed, authcrypt, pipe workflow) |
+
+### CLI commands
+
+```
+tap did generate-key [--output-dir <dir>]
+tap did generate-web --domain <d> [--path <p>] [--service-endpoint <url>] [--output-dir <dir>]
+tap pack signed    --key-file <f> [--send] [--did-doc <f>] [--message <m>]
+tap pack anoncrypt [--send] [--did-doc <f>] [--message <m>]
+tap pack authcrypt --key-file <f> [--send] [--did-doc <f>] [--message <m>]
+tap unpack         --key-file <f> [--did-doc <f>] [--message <m>]
+tap send           --to <url> [--message <m>]
+tap message <type> --from <did> --to <did> [--thid <id>] [--body <json>]
+tap receive        --key-file <f> [--did-doc <f>] [--message <m>]
+```
+
+The `did`, `pack`, `unpack`, and `send` commands delegate to `go-didcomm/cli` package. The `message` and `receive` commands are TAP-specific.
+
+### go-didcomm/cli package
+
+Shared CLI utilities are exported from `go-didcomm/cli/`. Both the `didcomm` and `tap` binaries import this package. Key exports: `ReadMessageInput`, `BuildClient`, `BuildResolverWithOverrides`, `LoadKeyFile`, `MarshalDIDDoc`, `MarshalKeyPair`, `DetectContentType`, `ParseMessage`, `RunDID`, `RunPack`, `RunUnpack`, `RunSend`.

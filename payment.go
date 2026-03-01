@@ -10,19 +10,19 @@ import (
 
 // PaymentBody represents the body of a TAP Payment message (TAIP-14).
 type PaymentBody struct {
-	Context                    string   `json:"@context"`
-	Type                       string   `json:"@type"`
-	Amount                     string   `json:"amount"`
-	Asset                      string   `json:"asset,omitempty"`
-	Currency                   string   `json:"currency,omitempty"`
-	Merchant                   *Party   `json:"merchant"`
-	Customer                   *Party   `json:"customer,omitempty"`
-	Agents                     []Agent  `json:"agents"`
-	SupportedAssets            []any    `json:"supportedAssets,omitempty"`
+	Context                     string   `json:"@context"`
+	Type                        string   `json:"@type"`
+	Amount                      string   `json:"amount"`
+	Asset                       string   `json:"asset,omitempty"`
+	Currency                    string   `json:"currency,omitempty"`
+	Merchant                    *Party   `json:"merchant"`
+	Customer                    *Party   `json:"customer,omitempty"`
+	Agents                      []Agent  `json:"agents"`
+	SupportedAssets             []any    `json:"supportedAssets,omitempty"`
 	FallbackSettlementAddresses []string `json:"fallbackSettlementAddresses,omitempty"`
-	Expiry                     string   `json:"expiry,omitempty"`
-	Invoice                    any      `json:"invoice,omitempty"`
-	Policies                   []Policy `json:"policies,omitempty"`
+	Expiry                      string   `json:"expiry,omitempty"`
+	Invoice                     any      `json:"invoice,omitempty"`
+	Policies                    []Policy `json:"policies,omitempty"`
 }
 
 func (b *PaymentBody) TAPType() string { return TypePayment }

@@ -21,11 +21,11 @@ const (
 	TypeCapture               = "https://tap.rsvp/schema/1.0#Capture"
 
 	// Agent management message types
-	TypeUpdateAgent   = "https://tap.rsvp/schema/1.0#UpdateAgent"
-	TypeUpdateParty   = "https://tap.rsvp/schema/1.0#UpdateParty"
-	TypeAddAgents     = "https://tap.rsvp/schema/1.0#AddAgents"
-	TypeReplaceAgent  = "https://tap.rsvp/schema/1.0#ReplaceAgent"
-	TypeRemoveAgent   = "https://tap.rsvp/schema/1.0#RemoveAgent"
+	TypeUpdateAgent  = "https://tap.rsvp/schema/1.0#UpdateAgent"
+	TypeUpdateParty  = "https://tap.rsvp/schema/1.0#UpdateParty"
+	TypeAddAgents    = "https://tap.rsvp/schema/1.0#AddAgents"
+	TypeReplaceAgent = "https://tap.rsvp/schema/1.0#ReplaceAgent"
+	TypeRemoveAgent  = "https://tap.rsvp/schema/1.0#RemoveAgent"
 
 	// Relationship message types
 	TypeConfirmRelationship = "https://tap.rsvp/schema/1.0#ConfirmRelationship"
