@@ -1,6 +1,7 @@
 package tap
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
@@ -46,7 +47,7 @@ func TestClient_ReceivePlainMessage(t *testing.T) {
 	dc := didcomm.NewClient(nil, nil)
 	client := NewClient(dc)
 
-	result, err := client.Receive(nil, envelope)
+	result, err := client.Receive(context.TODO(), envelope)
 	if err != nil {
 		t.Fatalf("Receive: %v", err)
 	}
