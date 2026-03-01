@@ -8,26 +8,54 @@ Go library for the [Transaction Authorization Protocol (TAP)](https://tap.rsvp) 
 go get github.com/TransactionAuthorizationProtocol/tap-go
 ```
 
+## How It Works
+
+`tap-go` sits on top of [go-didcomm](https://github.com/Notabene-id/go-didcomm), which handles DIDComm v2 message packing (signing, encryption) and unpacking. This library adds TAP-specific typed bodies, validation, and parsing.
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Your Application                │
+├─────────────────────────────────────────────────┤
+│  tap-go                                         │
+│  • Typed body structs (TransferBody, etc.)      │
+│  • Constructors with validation                 │
+│  • ParseBody() dispatch                         │
+│  • tap.Client.Receive() for typed parsing       │
+├─────────────────────────────────────────────────┤
+│  go-didcomm                                     │
+│  • didcomm.Message (ID, Type, From, To, Body)   │
+│  • Pack: Signed / Anoncrypt / Authcrypt → []byte│
+│  • Unpack: []byte → UnpackResult                │
+│  • DID resolution, key management               │
+└─────────────────────────────────────────────────┘
+```
+
+Every `New*Message()` constructor returns a `*didcomm.Message` — the standard go-didcomm type — with the TAP body serialized into `msg.Body` as `json.RawMessage`. You can then use go-didcomm's `PackSigned`, `PackAnoncrypt`, or `PackAuthcrypt` to send it, and `Unpack` + `ParseBody` (or `tap.Client.Receive`) to receive it.
+
 ## Quick Start
 
-### Creating a Transfer message
+### Sending: Create and pack a TAP message
 
 ```go
 package main
 
 import (
+    "context"
     "fmt"
+
     tap "github.com/TransactionAuthorizationProtocol/tap-go"
+    didcomm "github.com/Notabene-id/go-didcomm"
 )
 
 func main() {
+    // 1. Create a TAP message (returns a *didcomm.Message)
     msg, err := tap.NewTransferMessage(
-        "did:web:originator.vasp",
-        []string{"did:web:beneficiary.vasp"},
+        "did:web:originator.vasp",                    // from
+        []string{"did:web:beneficiary.vasp"},          // to
         &tap.TransferBody{
             Asset:  "eip155:1/slip44:60",
             Amount: "1.23",
-            Originator: &tap.Party{ID: "did:eg:bob"},
+            Originator:  &tap.Party{ID: "did:eg:bob"},
             Beneficiary: &tap.Party{ID: "did:eg:alice"},
             Agents: []tap.Agent{
                 {ID: "did:web:originator.vasp", For: tap.NewForField("did:eg:bob")},
@@ -38,57 +66,81 @@ func main() {
     if err != nil {
         panic(err)
     }
-    fmt.Printf("Message ID: %s\n", msg.ID)
-    fmt.Printf("Type: %s\n", msg.Type)
+
+    // 2. Pack with go-didcomm for transport (signed, encrypted, or both)
+    dc := didcomm.NewClient(resolver, secrets)
+
+    // Option A: Sign only (sender authenticated, not encrypted)
+    envelope, err := dc.PackSigned(context.Background(), msg)
+
+    // Option B: Encrypt only (anonymous, no sender identification)
+    envelope, err = dc.PackAnoncrypt(context.Background(), msg)
+
+    // Option C: Sign then encrypt (authenticated + encrypted)
+    envelope, err = dc.PackAuthcrypt(context.Background(), msg)
+
+    // 3. Send envelope ([]byte) over any transport (HTTP, WebSocket, etc.)
+    fmt.Printf("Sending %d bytes\n", len(envelope))
 }
 ```
 
-### Parsing a received message
+### Receiving: Unpack and parse a TAP message
 
 ```go
-import (
-    "encoding/json"
-    tap "github.com/TransactionAuthorizationProtocol/tap-go"
-    didcomm "github.com/Notabene-id/go-didcomm"
-)
-
-// Given a didcomm.Message (from Unpack or plain JSON)
-body, err := tap.ParseBody(msg)
-if err != nil {
-    // handle error
-}
-
-switch b := body.(type) {
-case *tap.TransferBody:
-    fmt.Printf("Transfer of %s %s\n", b.Amount, b.Asset)
-case *tap.PaymentBody:
-    fmt.Printf("Payment of %s %s\n", b.Amount, b.Currency)
-case *tap.AuthorizeBody:
-    fmt.Println("Transaction authorized")
-// ... handle all 20 message types
-}
-```
-
-### Using the TAP Client
-
-The `Client` wraps a `didcomm.Client` to handle DIDComm unpacking and TAP body parsing in one step:
-
-```go
+// Option A: Two-step — unpack with go-didcomm, then parse with tap-go
 dc := didcomm.NewClient(resolver, secrets)
-client := tap.NewClient(dc)
+result, err := dc.Unpack(ctx, envelope)  // → *didcomm.UnpackResult
+if err != nil { /* handle */ }
 
-result, err := client.Receive(ctx, envelope)
-if err != nil {
-    // handle error
+// Check if it's a TAP message
+if tap.IsTAPMessage(result.Message) {
+    body, err := tap.ParseBody(result.Message)
+    if err != nil { /* handle */ }
+
+    switch b := body.(type) {
+    case *tap.TransferBody:
+        fmt.Printf("Transfer of %s %s\n", b.Amount, b.Asset)
+    case *tap.PaymentBody:
+        fmt.Printf("Payment of %s %s\n", b.Amount, b.Currency)
+    case *tap.AuthorizeBody:
+        fmt.Println("Transaction authorized")
+    // ... handle all 20 types
+    }
 }
 
-fmt.Printf("Message: %s\n", result.Message.Type)
-fmt.Printf("Encrypted: %v, Signed: %v\n", result.Encrypted, result.Signed)
+// Option B: One-step — tap.Client does both unpack + parse
+client := tap.NewClient(dc)
+tapResult, err := client.Receive(ctx, envelope)  // → *tap.TAPResult
+if err != nil { /* handle */ }
 
-// Type-assert the body
-if transfer, ok := result.Body.(*tap.TransferBody); ok {
+fmt.Printf("Type: %s\n", tapResult.Message.Type)
+fmt.Printf("Encrypted: %v, Signed: %v\n", tapResult.Encrypted, tapResult.Signed)
+
+if transfer, ok := tapResult.Body.(*tap.TransferBody); ok {
     fmt.Printf("Transfer: %s %s\n", transfer.Amount, transfer.Asset)
 }
+```
+
+### Replying to a message (thread-based messages)
+
+Authorization flow and agent management messages reference an existing thread via `thid`:
+
+```go
+// Original transfer message starts a thread
+transferMsg, _ := tap.NewTransferMessage(from, to, transferBody)
+
+// Reply messages reference the original via thid
+authorizeMsg, _ := tap.NewAuthorizeMessage(
+    "did:web:beneficiary.vasp",                  // from (replier)
+    []string{"did:web:originator.vasp"},          // to (original sender)
+    transferMsg.ID,                               // thid — links to original
+    &tap.AuthorizeBody{
+        SettlementAddress: "eip155:1:0x1234a96D359eC26a11e2C2b3d8f8B8942d5Bfcdb",
+    },
+)
+
+// Pack and send the reply the same way
+envelope, _ := dc.PackAuthcrypt(ctx, authorizeMsg)
 ```
 
 ## Message Types
