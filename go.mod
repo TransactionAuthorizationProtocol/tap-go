@@ -1,6 +1,6 @@
 module github.com/TransactionAuthorizationProtocol/tap-go
 
-go 1.25.3
+go 1.25.5
 
 require (
 	github.com/Notabene-id/go-didcomm v0.1.0
