@@ -19,11 +19,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Checkout go-didcomm
-        uses: actions/checkout@v4
-        with:
-          repository: Notabene-id/go-didcomm
-          path: ../go-didcomm
+      - name: Clone go-didcomm
+        run: git clone --depth 1 https://github.com/Notabene-id/go-didcomm.git ../go-didcomm
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -46,11 +43,8 @@ jobs:
       - name: Checkout tap-go
         uses: actions/checkout@v4
 
-      - name: Checkout go-didcomm
-        uses: actions/checkout@v4
-        with:
-          repository: Notabene-id/go-didcomm
-          path: ../go-didcomm
+      - name: Clone go-didcomm
+        run: git clone --depth 1 https://github.com/Notabene-id/go-didcomm.git ../go-didcomm
 
       - name: Set up Go
         uses: actions/setup-go@v5
