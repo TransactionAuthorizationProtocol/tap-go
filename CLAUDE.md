@@ -97,6 +97,17 @@ Test vectors from `TAIPs/test-vectors/` are loaded in tests. The `TAIPs` directo
 
 The `Agent.For` field uses `ForField` type, which handles JSON marshaling of both single DID strings and arrays of DIDs. Use `NewForField("did:eg:alice")` or `NewForField("did:eg:alice", "did:eg:bob")`.
 
+## Pre-push checklist
+
+**Always run both the linter and tests locally before pushing:**
+
+```bash
+golangci-lint run ./...
+go test ./...
+```
+
+Fix any lint errors or test failures before pushing. CI runs both checks and will block the PR if either fails.
+
 ## Development guidelines
 
 - Every new message type needs: body struct, `TAPType()`, `New*Message()` constructor, a case in `ParseBody()`, and a matching `_test.go`
