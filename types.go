@@ -99,6 +99,7 @@ func (f *ForField) UnmarshalJSON(data []byte) error {
 type Policy struct {
 	Type                   string   `json:"@type"`
 	Context                any      `json:"@context,omitempty"`
+	From                   string   `json:"from,omitempty"`
 	FromAgent              string   `json:"fromAgent,omitempty"`
 	FromRole               string   `json:"fromRole,omitempty"`
 	AboutParty             string   `json:"aboutParty,omitempty"`

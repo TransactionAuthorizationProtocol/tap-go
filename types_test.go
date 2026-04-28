@@ -1,6 +1,7 @@
 package tap
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 )
@@ -134,6 +135,24 @@ func TestPolicy_JSONRoundTrip(t *testing.T) {
 
 	if got.Type != policy.Type || got.FromAgent != policy.FromAgent {
 		t.Errorf("round-trip mismatch: got %+v, want %+v", got, policy)
+	}
+}
+
+func TestPolicy_FromFieldRoundTrip(t *testing.T) {
+	in := Policy{Type: "RequireAuthorization", From: "did:web:vasp.example"}
+	data, err := json.Marshal(in)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if !bytes.Contains(data, []byte(`"from":"did:web:vasp.example"`)) {
+		t.Fatalf("missing from in JSON: %s", string(data))
+	}
+	var out Policy
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if out.From != in.From {
+		t.Errorf("From = %q, want %q", out.From, in.From)
 	}
 }
 
