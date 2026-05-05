@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-05
+
+### Changed
+
+- Bumped `github.com/Notabene-id/go-didcomm` from v0.2.0 to v0.4.0
+
 ## [0.3.0] - 2026-05-04
 
 ### Added
