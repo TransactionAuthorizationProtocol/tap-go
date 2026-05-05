@@ -9,9 +9,9 @@ func TestTypeConstants(t *testing.T) {
 	types := map[string]string{
 		"Transfer":              TypeTransfer,
 		"Payment":               TypePayment,
-		"Exchange":              TypeExchange,
+		"RFQ":                   TypeRFQ,
 		"Quote":                 TypeQuote,
-		"Escrow":                TypeEscrow,
+		"Lock":                  TypeLock,
 		"Authorize":             TypeAuthorize,
 		"AuthorizationRequired": TypeAuthorizationRequired,
 		"Settle":                TypeSettle,

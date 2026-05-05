@@ -32,12 +32,12 @@ func ParseBody(msg *didcomm.Message) (TAPBody, error) {
 		body = &TransferBody{}
 	case TypePayment:
 		body = &PaymentBody{}
-	case TypeExchange:
-		body = &ExchangeBody{}
+	case TypeRFQ:
+		body = &RFQBody{}
 	case TypeQuote:
 		body = &QuoteBody{}
-	case TypeEscrow:
-		body = &EscrowBody{}
+	case TypeLock:
+		body = &LockBody{}
 	case TypeAuthorize:
 		body = &AuthorizeBody{}
 	case TypeAuthorizationRequired:

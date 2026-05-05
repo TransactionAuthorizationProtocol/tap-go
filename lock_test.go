@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func TestNewEscrowMessage(t *testing.T) {
-	body := &EscrowBody{
+func TestNewLockMessage(t *testing.T) {
+	body := &LockBody{
 		Asset:       "eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
 		Amount:      "1000.00",
 		Originator:  &Party{ID: "did:web:buyer.example"},
@@ -19,17 +19,17 @@ func TestNewEscrowMessage(t *testing.T) {
 		},
 	}
 
-	msg, err := NewEscrowMessage("did:web:buyer.example", []string{"did:web:escrow-service.example"}, body)
+	msg, err := NewLockMessage("did:web:buyer.example", []string{"did:web:escrow-service.example"}, body)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if msg.Type != TypeEscrow {
+	if msg.Type != TypeLock {
 		t.Errorf("Type: got %q", msg.Type)
 	}
 }
 
-func TestNewEscrowMessage_MissingFields(t *testing.T) {
-	base := EscrowBody{
+func TestNewLockMessage_MissingFields(t *testing.T) {
+	base := LockBody{
 		Asset:       "eip155:1/erc20:0xA0b86991",
 		Amount:      "1000.00",
 		Originator:  &Party{ID: "did:web:buyer"},
@@ -40,21 +40,21 @@ func TestNewEscrowMessage_MissingFields(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		modify func(*EscrowBody)
+		modify func(*LockBody)
 	}{
-		{"missing amount", func(b *EscrowBody) { b.Amount = "" }},
-		{"missing originator", func(b *EscrowBody) { b.Originator = nil }},
-		{"missing beneficiary", func(b *EscrowBody) { b.Beneficiary = nil }},
-		{"missing expiry", func(b *EscrowBody) { b.Expiry = "" }},
-		{"missing agents", func(b *EscrowBody) { b.Agents = nil }},
-		{"missing asset and currency", func(b *EscrowBody) { b.Asset = "" }},
+		{"missing amount", func(b *LockBody) { b.Amount = "" }},
+		{"missing originator", func(b *LockBody) { b.Originator = nil }},
+		{"missing beneficiary", func(b *LockBody) { b.Beneficiary = nil }},
+		{"missing expiry", func(b *LockBody) { b.Expiry = "" }},
+		{"missing agents", func(b *LockBody) { b.Agents = nil }},
+		{"missing asset and currency", func(b *LockBody) { b.Asset = "" }},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := base
 			tt.modify(&b)
-			_, err := NewEscrowMessage("from", nil, &b)
+			_, err := NewLockMessage("from", nil, &b)
 			if !errors.Is(err, ErrInvalidBody) {
 				t.Errorf("expected ErrInvalidBody, got %v", err)
 			}
@@ -62,10 +62,10 @@ func TestNewEscrowMessage_MissingFields(t *testing.T) {
 	}
 }
 
-func TestEscrowBody_JSONRoundTrip(t *testing.T) {
-	body := EscrowBody{
+func TestLockBody_JSONRoundTrip(t *testing.T) {
+	body := LockBody{
 		Context:     TAPContext,
-		Type:        TypeEscrow,
+		Type:        TypeLock,
 		Asset:       "eip155:1/erc20:0xa0b86991",
 		Amount:      "1000.00",
 		Originator:  &Party{ID: "did:web:buyer.example"},
@@ -79,7 +79,7 @@ func TestEscrowBody_JSONRoundTrip(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got EscrowBody
+	var got LockBody
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
@@ -88,8 +88,8 @@ func TestEscrowBody_JSONRoundTrip(t *testing.T) {
 	}
 }
 
-func TestEscrow_TestVectorValid(t *testing.T) {
-	data, err := os.ReadFile("TAIPs/test-vectors/escrow/valid-escrow.json")
+func TestLock_TestVectorValid(t *testing.T) {
+	data, err := os.ReadFile("TAIPs/test-vectors/lock/valid-lock.json")
 	if err != nil {
 		t.Skipf("test vector not available: %v", err)
 	}
@@ -103,7 +103,7 @@ func TestEscrow_TestVectorValid(t *testing.T) {
 		t.Fatalf("unmarshal test vector: %v", err)
 	}
 
-	var body EscrowBody
+	var body LockBody
 	if err := json.Unmarshal(tv.Message.Body, &body); err != nil {
 		t.Fatalf("unmarshal body: %v", err)
 	}
@@ -119,8 +119,8 @@ func TestEscrow_TestVectorValid(t *testing.T) {
 	}
 }
 
-func TestEscrowBody_ParseBody(t *testing.T) {
-	body := &EscrowBody{
+func TestLockBody_ParseBody(t *testing.T) {
+	body := &LockBody{
 		Asset:       "eip155:1/erc20:0xa0b86991",
 		Amount:      "500.00",
 		Originator:  &Party{ID: "did:web:buyer"},
@@ -128,7 +128,7 @@ func TestEscrowBody_ParseBody(t *testing.T) {
 		Expiry:      "2024-12-31T00:00:00Z",
 		Agents:      []Agent{{ID: "did:web:escrow", Role: "EscrowAgent"}},
 	}
-	msg, err := NewEscrowMessage("did:web:buyer", []string{"did:web:escrow"}, body)
+	msg, err := NewLockMessage("did:web:buyer", []string{"did:web:escrow"}, body)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -137,11 +137,11 @@ func TestEscrowBody_ParseBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	eb, ok := parsed.(*EscrowBody)
+	lb, ok := parsed.(*LockBody)
 	if !ok {
-		t.Fatalf("expected *EscrowBody, got %T", parsed)
+		t.Fatalf("expected *LockBody, got %T", parsed)
 	}
-	if eb.Amount != "500.00" {
-		t.Errorf("Amount: got %q", eb.Amount)
+	if lb.Amount != "500.00" {
+		t.Errorf("Amount: got %q", lb.Amount)
 	}
 }

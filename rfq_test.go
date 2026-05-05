@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestNewExchangeMessage(t *testing.T) {
-	body := &ExchangeBody{
+func TestNewRFQMessage(t *testing.T) {
+	body := &RFQBody{
 		FromAssets: []string{"eip155:1/slip44:60"},
 		ToAssets:   []string{"USD"},
 		FromAmount: "1.0",
@@ -15,15 +15,15 @@ func TestNewExchangeMessage(t *testing.T) {
 		Agents:     []Agent{{ID: "did:web:exchange.example", For: NewForField("did:eg:alice")}},
 	}
 
-	msg, err := NewExchangeMessage("did:web:exchange.example", []string{"did:web:provider.example"}, body)
+	msg, err := NewRFQMessage("did:web:exchange.example", []string{"did:web:provider.example"}, body)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if msg.Type != TypeExchange {
+	if msg.Type != TypeRFQ {
 		t.Errorf("Type: got %q", msg.Type)
 	}
 
-	var got ExchangeBody
+	var got RFQBody
 	if err := json.Unmarshal(msg.Body, &got); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
@@ -32,36 +32,36 @@ func TestNewExchangeMessage(t *testing.T) {
 	}
 }
 
-func TestNewExchangeMessage_MissingFromAssets(t *testing.T) {
-	body := &ExchangeBody{
+func TestNewRFQMessage_MissingFromAssets(t *testing.T) {
+	body := &RFQBody{
 		ToAssets:   []string{"USD"},
 		FromAmount: "1.0",
 		Requester:  &Party{ID: "did:eg:alice"},
 		Agents:     []Agent{{ID: "did:web:exchange.example"}},
 	}
-	_, err := NewExchangeMessage("from", nil, body)
+	_, err := NewRFQMessage("from", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
 		t.Errorf("expected ErrInvalidBody, got %v", err)
 	}
 }
 
-func TestNewExchangeMessage_MissingAmounts(t *testing.T) {
-	body := &ExchangeBody{
+func TestNewRFQMessage_MissingAmounts(t *testing.T) {
+	body := &RFQBody{
 		FromAssets: []string{"ETH"},
 		ToAssets:   []string{"USD"},
 		Requester:  &Party{ID: "did:eg:alice"},
 		Agents:     []Agent{{ID: "did:web:exchange.example"}},
 	}
-	_, err := NewExchangeMessage("from", nil, body)
+	_, err := NewRFQMessage("from", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
 		t.Errorf("expected ErrInvalidBody, got %v", err)
 	}
 }
 
-func TestExchangeBody_JSONRoundTrip(t *testing.T) {
-	body := ExchangeBody{
+func TestRFQBody_JSONRoundTrip(t *testing.T) {
+	body := RFQBody{
 		Context:    TAPContext,
-		Type:       TypeExchange,
+		Type:       TypeRFQ,
 		FromAssets: []string{"eip155:1/slip44:60"},
 		ToAssets:   []string{"USD"},
 		FromAmount: "1.0",
@@ -74,7 +74,7 @@ func TestExchangeBody_JSONRoundTrip(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 
-	var got ExchangeBody
+	var got RFQBody
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
@@ -83,15 +83,15 @@ func TestExchangeBody_JSONRoundTrip(t *testing.T) {
 	}
 }
 
-func TestExchangeBody_ParseBody(t *testing.T) {
-	body := &ExchangeBody{
+func TestRFQBody_ParseBody(t *testing.T) {
+	body := &RFQBody{
 		FromAssets: []string{"ETH"},
 		ToAssets:   []string{"USD"},
 		ToAmount:   "3000.00",
 		Requester:  &Party{ID: "did:eg:alice"},
 		Agents:     []Agent{{ID: "did:web:exchange.example"}},
 	}
-	msg, err := NewExchangeMessage("did:web:exchange.example", nil, body)
+	msg, err := NewRFQMessage("did:web:exchange.example", nil, body)
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -100,11 +100,11 @@ func TestExchangeBody_ParseBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	eb, ok := parsed.(*ExchangeBody)
+	rb, ok := parsed.(*RFQBody)
 	if !ok {
-		t.Fatalf("expected *ExchangeBody, got %T", parsed)
+		t.Fatalf("expected *RFQBody, got %T", parsed)
 	}
-	if eb.ToAmount != "3000.00" {
-		t.Errorf("ToAmount: got %q", eb.ToAmount)
+	if rb.ToAmount != "3000.00" {
+		t.Errorf("ToAmount: got %q", rb.ToAmount)
 	}
 }

@@ -16,7 +16,7 @@ import (
 const messageUsage = `Usage: tap message <type> --from <did> --to <did> [--thid <id>] [--body <json>]
 
 Initiating types (no --thid):
-  transfer, payment, exchange, escrow, connect
+  transfer, payment, rfq, lock, connect
 
 Reply types (require --thid):
   authorize, authorization-required, settle, reject, cancel, revert,
@@ -111,10 +111,10 @@ func runMessage(args []string) error {
 		return runMessageTransfer(msgArgs)
 	case "payment":
 		return runMessagePayment(msgArgs)
-	case "exchange":
-		return runMessageExchange(msgArgs)
-	case "escrow":
-		return runMessageEscrow(msgArgs)
+	case "rfq":
+		return runMessageRFQ(msgArgs)
+	case "lock":
+		return runMessageLock(msgArgs)
 	case "connect":
 		return runMessageConnect(msgArgs)
 
@@ -189,32 +189,32 @@ func runMessagePayment(args []string) error {
 	return writeMessage(msg)
 }
 
-func runMessageExchange(args []string) error {
-	f, err := parseMessageFlags("exchange", args, false)
+func runMessageRFQ(args []string) error {
+	f, err := parseMessageFlags("rfq", args, false)
 	if err != nil {
 		return err
 	}
-	var body tap.ExchangeBody
+	var body tap.RFQBody
 	if err := json.Unmarshal(f.body, &body); err != nil {
 		return fmt.Errorf("parse body JSON: %w", err)
 	}
-	msg, err := tap.NewExchangeMessage(f.from, f.to, &body)
+	msg, err := tap.NewRFQMessage(f.from, f.to, &body)
 	if err != nil {
 		return err
 	}
 	return writeMessage(msg)
 }
 
-func runMessageEscrow(args []string) error {
-	f, err := parseMessageFlags("escrow", args, false)
+func runMessageLock(args []string) error {
+	f, err := parseMessageFlags("lock", args, false)
 	if err != nil {
 		return err
 	}
-	var body tap.EscrowBody
+	var body tap.LockBody
 	if err := json.Unmarshal(f.body, &body); err != nil {
 		return fmt.Errorf("parse body JSON: %w", err)
 	}
-	msg, err := tap.NewEscrowMessage(f.from, f.to, &body)
+	msg, err := tap.NewLockMessage(f.from, f.to, &body)
 	if err != nil {
 		return err
 	}

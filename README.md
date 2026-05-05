@@ -159,9 +159,9 @@ envelope, _ := dc.PackAuthcrypt(ctx, authorizeMsg)
 |------------|-------------|------|-----------------|
 | `NewTransferMessage` | `TransferBody` | [TAIP-3](https://tap.rsvp/TAIPs/taip-3) | `asset`, `agents` |
 | `NewPaymentMessage` | `PaymentBody` | [TAIP-14](https://tap.rsvp/TAIPs/taip-14) | `amount`, `merchant`, `agents`, `asset` or `currency` |
-| `NewExchangeMessage` | `ExchangeBody` | [TAIP-18](https://tap.rsvp/TAIPs/taip-18) | `fromAssets`, `toAssets`, `requester`, `agents`, `fromAmount` or `toAmount` |
+| `NewRFQMessage` | `RFQBody` | [TAIP-18](https://tap.rsvp/TAIPs/taip-18) | `fromAssets`, `toAssets`, `requester`, `agents`, `fromAmount` or `toAmount` |
 | `NewQuoteMessage` | `QuoteBody` | [TAIP-18](https://tap.rsvp/TAIPs/taip-18) | `fromAsset`, `toAsset`, `fromAmount`, `toAmount`, `provider`, `agents`, `expiresAt` |
-| `NewEscrowMessage` | `EscrowBody` | [TAIP-17](https://tap.rsvp/TAIPs/taip-17) | `amount`, `originator`, `beneficiary`, `expiry`, `agents`, `asset` or `currency` |
+| `NewLockMessage` | `LockBody` | [TAIP-17](https://tap.rsvp/TAIPs/taip-17) | `amount`, `originator`, `beneficiary`, `expiry`, `agents`, `asset` or `currency` |
 
 ### Authorization Flow Messages
 
@@ -331,7 +331,7 @@ The `receive` command outputs JSON with the unpacked message, typed body, and en
 
 ### TAP message types
 
-**Initiating (no `--thid`):** `transfer`, `payment`, `exchange`, `escrow`, `connect`
+**Initiating (no `--thid`):** `transfer`, `payment`, `rfq`, `lock`, `connect`
 
 **Reply (require `--thid`):** `authorize`, `authorization-required`, `settle`, `reject`, `cancel`, `revert`, `capture`, `quote`, `add-agents`, `remove-agent`, `replace-agent`, `update-agent`, `update-party`, `update-policies`, `confirm-relationship`
 
