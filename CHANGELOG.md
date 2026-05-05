@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-04
+
 ### Added
 
 - GitHub Actions CI with test, lint (golangci-lint), and vulncheck jobs
