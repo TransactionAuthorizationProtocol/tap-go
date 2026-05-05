@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// EscrowBody represents the body of a TAP Escrow message (TAIP-17).
-type EscrowBody struct {
+// LockBody represents the body of a TAP Lock message (TAIP-17).
+type LockBody struct {
 	Context     string  `json:"@context"`
 	Type        string  `json:"@type"`
 	Asset       string  `json:"asset,omitempty"`
@@ -22,10 +22,10 @@ type EscrowBody struct {
 	Agreement   string  `json:"agreement,omitempty"`
 }
 
-func (b *EscrowBody) TAPType() string { return TypeEscrow }
+func (b *LockBody) TAPType() string { return TypeLock }
 
-// NewEscrowMessage creates a new DIDComm message with an Escrow body.
-func NewEscrowMessage(from string, to []string, body *EscrowBody) (*didcomm.Message, error) {
+// NewLockMessage creates a new DIDComm message with a Lock body.
+func NewLockMessage(from string, to []string, body *LockBody) (*didcomm.Message, error) {
 	if body.Amount == "" {
 		return nil, fmt.Errorf("%w: missing amount", ErrInvalidBody)
 	}
@@ -46,7 +46,7 @@ func NewEscrowMessage(from string, to []string, body *EscrowBody) (*didcomm.Mess
 	}
 
 	body.Context = TAPContext
-	body.Type = TypeEscrow
+	body.Type = TypeLock
 
 	rawBody, err := json.Marshal(body)
 	if err != nil {
@@ -55,7 +55,7 @@ func NewEscrowMessage(from string, to []string, body *EscrowBody) (*didcomm.Mess
 
 	return &didcomm.Message{
 		ID:   uuid.New().String(),
-		Type: TypeEscrow,
+		Type: TypeLock,
 		From: from,
 		To:   to,
 		Body: rawBody,

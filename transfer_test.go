@@ -123,6 +123,60 @@ func TestTransferBody_ParseBody(t *testing.T) {
 	}
 }
 
+func TestTransferBody_TransactionValue(t *testing.T) {
+	body := &TransferBody{
+		Asset:  "eip155:1/erc20:0x1234567890abcdef1234567890abcdef12345678",
+		Amount: "500",
+		TransactionValue: &TransactionValue{
+			Amount:   "1250.00",
+			Currency: "EUR",
+		},
+		Agents: []Agent{{ID: "did:web:originator.vasp", For: NewForField("did:eg:bob")}},
+	}
+
+	msg, err := NewTransferMessage("did:web:originator.vasp", []string{"did:web:beneficiary.vasp"}, body)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	parsed, err := ParseBody(msg)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	tb := parsed.(*TransferBody)
+	if tb.TransactionValue == nil {
+		t.Fatal("TransactionValue: got nil")
+	}
+	if tb.TransactionValue.Amount != "1250.00" {
+		t.Errorf("TransactionValue.Amount: got %q", tb.TransactionValue.Amount)
+	}
+	if tb.TransactionValue.Currency != "EUR" {
+		t.Errorf("TransactionValue.Currency: got %q", tb.TransactionValue.Currency)
+	}
+
+	// transactionValue is optional — confirm omitempty when nil
+	bodyNoValue := &TransferBody{
+		Asset:  "eip155:1/slip44:60",
+		Agents: []Agent{{ID: "did:web:originator.vasp"}},
+	}
+	msg2, err := NewTransferMessage("did:web:originator.vasp", nil, bodyNoValue)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if string(msg2.Body) == "" || jsonContains(msg2.Body, "transactionValue") {
+		t.Errorf("expected no transactionValue field, body=%s", msg2.Body)
+	}
+}
+
+func jsonContains(body []byte, key string) bool {
+	for i := 0; i < len(body)-len(key); i++ {
+		if string(body[i:i+len(key)]) == key {
+			return true
+		}
+	}
+	return false
+}
+
 func TestTransfer_TestVectorValid(t *testing.T) {
 	data, err := os.ReadFile("TAIPs/test-vectors/transfer/valid.json")
 	if err != nil {

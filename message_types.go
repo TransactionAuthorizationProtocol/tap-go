@@ -7,9 +7,9 @@ const (
 	// Transaction message types
 	TypeTransfer = "https://tap.rsvp/schema/1.0#Transfer"
 	TypePayment  = "https://tap.rsvp/schema/1.0#Payment"
-	TypeExchange = "https://tap.rsvp/schema/1.0#Exchange"
+	TypeRFQ      = "https://tap.rsvp/schema/1.0#RFQ"
 	TypeQuote    = "https://tap.rsvp/schema/1.0#Quote"
-	TypeEscrow   = "https://tap.rsvp/schema/1.0#Escrow"
+	TypeLock     = "https://tap.rsvp/schema/1.0#Lock"
 
 	// Authorization flow message types
 	TypeAuthorize             = "https://tap.rsvp/schema/1.0#Authorize"
@@ -38,9 +38,9 @@ func AllTypes() []string {
 	return []string{
 		TypeTransfer,
 		TypePayment,
-		TypeExchange,
+		TypeRFQ,
 		TypeQuote,
-		TypeEscrow,
+		TypeLock,
 		TypeAuthorize,
 		TypeAuthorizationRequired,
 		TypeSettle,

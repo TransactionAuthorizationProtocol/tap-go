@@ -16,9 +16,9 @@
 // Transaction messages initiate financial operations:
 //   - Transfer (TAIP-3) — asset transfer between parties
 //   - Payment (TAIP-14) — merchant payment request
-//   - Exchange (TAIP-18) — asset exchange request
+//   - RFQ (TAIP-18) — request for quote on an asset exchange
 //   - Quote (TAIP-18) — exchange price quote response
-//   - Escrow (TAIP-17) — hold funds in escrow
+//   - Lock (TAIP-17) — hold funds in escrow
 //
 // Authorization flow messages manage transaction lifecycle:
 //   - Authorize (TAIP-4) — approve a transaction
@@ -27,7 +27,7 @@
 //   - Reject (TAIP-4) — reject a transaction
 //   - Cancel (TAIP-4) — cancel a transaction
 //   - Revert (TAIP-4) — request reversal of settled transaction
-//   - Capture (TAIP-17) — release escrowed funds
+//   - Capture (TAIP-17) — release locked funds
 //
 // Agent management messages modify transaction participants:
 //   - UpdateAgent (TAIP-5) — update agent information

@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// ExchangeBody represents the body of a TAP Exchange message (TAIP-18).
-type ExchangeBody struct {
+// RFQBody represents the body of a TAP RFQ (Request for Quote) message (TAIP-18).
+type RFQBody struct {
 	Context    string   `json:"@context"`
 	Type       string   `json:"@type"`
 	FromAssets []string `json:"fromAssets"`
@@ -22,10 +22,10 @@ type ExchangeBody struct {
 	Policies   []Policy `json:"policies,omitempty"`
 }
 
-func (b *ExchangeBody) TAPType() string { return TypeExchange }
+func (b *RFQBody) TAPType() string { return TypeRFQ }
 
-// NewExchangeMessage creates a new DIDComm message with an Exchange body.
-func NewExchangeMessage(from string, to []string, body *ExchangeBody) (*didcomm.Message, error) {
+// NewRFQMessage creates a new DIDComm message with an RFQ body.
+func NewRFQMessage(from string, to []string, body *RFQBody) (*didcomm.Message, error) {
 	if len(body.FromAssets) == 0 {
 		return nil, fmt.Errorf("%w: missing fromAssets", ErrInvalidBody)
 	}
@@ -43,7 +43,7 @@ func NewExchangeMessage(from string, to []string, body *ExchangeBody) (*didcomm.
 	}
 
 	body.Context = TAPContext
-	body.Type = TypeExchange
+	body.Type = TypeRFQ
 
 	rawBody, err := json.Marshal(body)
 	if err != nil {
@@ -52,7 +52,7 @@ func NewExchangeMessage(from string, to []string, body *ExchangeBody) (*didcomm.
 
 	return &didcomm.Message{
 		ID:   uuid.New().String(),
-		Type: TypeExchange,
+		Type: TypeRFQ,
 		From: from,
 		To:   to,
 		Body: rawBody,

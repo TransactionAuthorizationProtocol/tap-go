@@ -237,49 +237,49 @@ func TestCLI_MessagePayment(t *testing.T) {
 	}
 }
 
-func TestCLI_MessageExchange(t *testing.T) {
+func TestCLI_MessageRFQ(t *testing.T) {
 	bin := buildBinary(t)
 	body := `{"fromAssets":["eip155:1/slip44:60"],"toAssets":["eip155:1/slip44:0"],"fromAmount":"1.0","requester":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
 
-	cmd := exec.Command(bin, "message", "exchange",
+	cmd := exec.Command(bin, "message", "rfq",
 		"--from", "did:key:z1",
 		"--to", "did:key:z2",
 		"--body", body,
 	)
 	out, err := cmd.Output()
 	if err != nil {
-		t.Fatalf("message exchange failed: %s", err)
+		t.Fatalf("message rfq failed: %s", err)
 	}
 
 	var msg didcomm.Message
 	if err := json.Unmarshal(out, &msg); err != nil {
 		t.Fatalf("invalid JSON: %s", err)
 	}
-	if msg.Type != tap.TypeExchange {
-		t.Fatalf("expected type %s, got %s", tap.TypeExchange, msg.Type)
+	if msg.Type != tap.TypeRFQ {
+		t.Fatalf("expected type %s, got %s", tap.TypeRFQ, msg.Type)
 	}
 }
 
-func TestCLI_MessageEscrow(t *testing.T) {
+func TestCLI_MessageLock(t *testing.T) {
 	bin := buildBinary(t)
 	body := `{"asset":"eip155:1/slip44:60","amount":"5.0","originator":{"@id":"did:key:z1"},"beneficiary":{"@id":"did:key:z2"},"expiry":"2025-12-31T23:59:59Z","agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
 
-	cmd := exec.Command(bin, "message", "escrow",
+	cmd := exec.Command(bin, "message", "lock",
 		"--from", "did:key:z1",
 		"--to", "did:key:z2",
 		"--body", body,
 	)
 	out, err := cmd.Output()
 	if err != nil {
-		t.Fatalf("message escrow failed: %s", err)
+		t.Fatalf("message lock failed: %s", err)
 	}
 
 	var msg didcomm.Message
 	if err := json.Unmarshal(out, &msg); err != nil {
 		t.Fatalf("invalid JSON: %s", err)
 	}
-	if msg.Type != tap.TypeEscrow {
-		t.Fatalf("expected type %s, got %s", tap.TypeEscrow, msg.Type)
+	if msg.Type != tap.TypeLock {
+		t.Fatalf("expected type %s, got %s", tap.TypeLock, msg.Type)
 	}
 }
 

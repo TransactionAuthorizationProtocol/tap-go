@@ -28,7 +28,7 @@ Commands:
   help                                                      Print this help
 
 TAP message types:
-  Initiating:  transfer, payment, exchange, escrow, connect
+  Initiating:  transfer, payment, rfq, lock, connect
   Reply:       authorize, authorization-required, settle, reject, cancel,
                revert, capture, quote, add-agents, remove-agent,
                replace-agent, update-agent, update-party, update-policies,

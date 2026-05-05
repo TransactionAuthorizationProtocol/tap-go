@@ -15,9 +15,9 @@ func TestIsTAPMessage(t *testing.T) {
 	}{
 		{TypeTransfer, true},
 		{TypePayment, true},
-		{TypeExchange, true},
+		{TypeRFQ, true},
 		{TypeQuote, true},
-		{TypeEscrow, true},
+		{TypeLock, true},
 		{TypeAuthorize, true},
 		{TypeAuthorizationRequired, true},
 		{TypeSettle, true},
@@ -53,9 +53,9 @@ func TestParseBody_AllTypes(t *testing.T) {
 	}{
 		{"Transfer", TypeTransfer, &TransferBody{Context: TAPContext, Type: TypeTransfer, Asset: "ETH", Agents: []Agent{{ID: "a"}}}},
 		{"Payment", TypePayment, &PaymentBody{Context: TAPContext, Type: TypePayment, Amount: "100", Currency: "USD", Merchant: &Party{ID: "m"}, Agents: []Agent{{ID: "a"}}}},
-		{"Exchange", TypeExchange, &ExchangeBody{Context: TAPContext, Type: TypeExchange, FromAssets: []string{"ETH"}, ToAssets: []string{"USD"}, FromAmount: "1", Requester: &Party{ID: "r"}, Agents: []Agent{{ID: "a"}}}},
+		{"RFQ", TypeRFQ, &RFQBody{Context: TAPContext, Type: TypeRFQ, FromAssets: []string{"ETH"}, ToAssets: []string{"USD"}, FromAmount: "1", Requester: &Party{ID: "r"}, Agents: []Agent{{ID: "a"}}}},
 		{"Quote", TypeQuote, &QuoteBody{Context: TAPContext, Type: TypeQuote, FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"Escrow", TypeEscrow, &EscrowBody{Context: TAPContext, Type: TypeEscrow, Asset: "ETH", Amount: "100", Originator: &Party{ID: "o"}, Beneficiary: &Party{ID: "b"}, Expiry: "2025-01-01T00:00:00Z", Agents: []Agent{{ID: "a"}}}},
+		{"Lock", TypeLock, &LockBody{Context: TAPContext, Type: TypeLock, Asset: "ETH", Amount: "100", Originator: &Party{ID: "o"}, Beneficiary: &Party{ID: "b"}, Expiry: "2025-01-01T00:00:00Z", Agents: []Agent{{ID: "a"}}}},
 		{"Authorize", TypeAuthorize, &AuthorizeBody{Context: TAPContext, Type: TypeAuthorize}},
 		{"AuthorizationRequired", TypeAuthorizationRequired, &AuthorizationRequiredBody{Context: TAPContext, Type: TypeAuthorizationRequired, AuthorizationURL: "https://example.com", Expires: "2025-01-01T00:00:00Z"}},
 		{"Settle", TypeSettle, &SettleBody{Context: TAPContext, Type: TypeSettle, SettlementAddress: "eip155:1:0x1234"}},

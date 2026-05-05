@@ -53,9 +53,9 @@ Single flat `tap` package — all types and helpers in the root. One file per me
 | `client.go` | `Client` wrapping `didcomm.Client`, `Receive()` returning `TAPResult` |
 | `transfer.go` | `TransferBody` + `NewTransferMessage()` |
 | `payment.go` | `PaymentBody` + `NewPaymentMessage()` |
-| `exchange.go` | `ExchangeBody` + `NewExchangeMessage()` |
+| `rfq.go` | `RFQBody` + `NewRFQMessage()` |
 | `quote.go` | `QuoteBody` + `NewQuoteMessage()` |
-| `escrow.go` | `EscrowBody` + `NewEscrowMessage()` |
+| `lock.go` | `LockBody` + `NewLockMessage()` |
 | `authorize.go` | `AuthorizeBody` + `NewAuthorizeMessage()` |
 | `authorization_required.go` | `AuthorizationRequiredBody` + `NewAuthorizationRequiredMessage()` |
 | `settle.go` | `SettleBody` + `NewSettleMessage()` |
