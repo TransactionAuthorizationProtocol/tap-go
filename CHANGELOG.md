@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Bumped Go from 1.25.0 to 1.25.3 to fix stdlib vulnerabilities
+- Bumped Go from 1.25.0 to 1.26.2 to fix stdlib vulnerabilities
 - Use published go-didcomm v0.1.0 instead of local replace directive
 - **BREAKING (TAIP-17):** Renamed `Escrow` message type to `Lock`. Constants,
   types, constructors, files, and CLI subcommand all renamed:
