@@ -189,7 +189,7 @@ envelope, _ := dc.PackAuthcrypt(ctx, authorizeMsg)
 
 | Constructor | Body Struct | TAIP | Required Fields |
 |------------|-------------|------|-----------------|
-| `NewConfirmRelationshipMessage` | `ConfirmRelationshipBody` | [TAIP-9](https://tap.rsvp/TAIPs/taip-9) | `relationship`, `status` |
+| `NewConfirmRelationshipMessage` | `ConfirmRelationshipBody` | [TAIP-9](https://tap.rsvp/TAIPs/taip-9) | `@id`, `for` |
 | `NewUpdatePoliciesMessage` | `UpdatePoliciesBody` | [TAIP-7](https://tap.rsvp/TAIPs/taip-7) | `policies` |
 | `NewConnectMessage` | `ConnectBody` | [TAIP-15](https://tap.rsvp/TAIPs/taip-15) | `requester`, `principal`, `agents`, `constraints` |
 

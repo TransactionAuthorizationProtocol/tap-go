@@ -193,14 +193,6 @@ type DocumentReference struct {
 	URL          string `json:"url,omitempty"`
 }
 
-// Relationship represents a relationship between parties for ConfirmRelationship.
-type Relationship struct {
-	Type            string  `json:"type"`
-	Parties         []Party `json:"parties"`
-	EstablishedDate string  `json:"establishedDate,omitempty"`
-	Reference       string  `json:"reference,omitempty"`
-}
-
 // SupportedAssetPricing represents an asset with pricing information for payments.
 type SupportedAssetPricing struct {
 	Asset   string `json:"asset"`

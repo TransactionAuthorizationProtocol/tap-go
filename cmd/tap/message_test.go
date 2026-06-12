@@ -643,7 +643,7 @@ func TestCLI_MessageUpdatePolicies(t *testing.T) {
 
 func TestCLI_MessageConfirmRelationship(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"relationship":{"type":"customer","parties":[{"@id":"did:key:z1"},{"@id":"did:key:z2"}]},"status":"confirmed"}`
+	body := `{"@id":"did:pkh:eip155:1:0x1234","for":"did:key:z1","role":"SettlementAddress"}`
 
 	cmd := exec.Command(bin, "message", "confirm-relationship",
 		"--from", "did:key:z1",

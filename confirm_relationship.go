@@ -8,30 +8,29 @@ import (
 	"github.com/google/uuid"
 )
 
-// ConfirmRelationshipBody represents the body of a TAP ConfirmRelationship message (TAIP-9).
+// ConfirmRelationshipBody is the body of a ConfirmRelationship message (TAIP-9):
+// the Agent payload, asserting that @id acts for the entity in "for".
 type ConfirmRelationshipBody struct {
-	Context      string        `json:"@context"`
-	Type         string        `json:"@type"`
-	Relationship *Relationship `json:"relationship"`
-	Status       string        `json:"status"`
-	ValidFrom    string        `json:"validFrom,omitempty"`
-	ValidUntil   string        `json:"validUntil,omitempty"`
-	Details      any           `json:"details,omitempty"`
+	Context string   `json:"@context"`
+	Type    string   `json:"@type"`
+	ID      string   `json:"@id"` // the agent being confirmed
+	For     ForField `json:"for"` // the entity it acts on behalf of
+	Role    string   `json:"role,omitempty"`
 }
 
 func (b *ConfirmRelationshipBody) TAPType() string { return TypeConfirmRelationship }
 
 // NewConfirmRelationshipMessage creates a new DIDComm message with a ConfirmRelationship body.
 func NewConfirmRelationshipMessage(from string, to []string, thid string, body *ConfirmRelationshipBody) (*didcomm.Message, error) {
-	if body.Relationship == nil {
-		return nil, fmt.Errorf("%w: missing relationship", ErrInvalidBody)
+	if body.ID == "" {
+		return nil, fmt.Errorf("%w: missing @id", ErrInvalidBody)
 	}
-	if body.Status == "" {
-		return nil, fmt.Errorf("%w: missing status", ErrInvalidBody)
+	if body.For.IsEmpty() {
+		return nil, fmt.Errorf("%w: missing for", ErrInvalidBody)
 	}
 
 	body.Context = TAPContext
-	body.Type = TypeConfirmRelationship
+	body.Type = TypeAgent
 
 	rawBody, err := json.Marshal(body)
 	if err != nil {
