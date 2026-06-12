@@ -68,7 +68,7 @@ func TestParseBody_AllTypes(t *testing.T) {
 		{"AddAgents", TypeAddAgents, &AddAgentsBody{Context: TAPContext, Type: TypeAddAgents, Agents: []Agent{{ID: "a"}}}},
 		{"ReplaceAgent", TypeReplaceAgent, &ReplaceAgentBody{Context: TAPContext, Type: TypeReplaceAgent, Original: "old", Replacement: &Agent{ID: "new"}}},
 		{"RemoveAgent", TypeRemoveAgent, &RemoveAgentBody{Context: TAPContext, Type: TypeRemoveAgent, Agent: "did:web:old"}},
-		{"ConfirmRelationship", TypeConfirmRelationship, &ConfirmRelationshipBody{Context: TAPContext, Type: TypeConfirmRelationship, Relationship: &Relationship{Type: "customer", Parties: []Party{{ID: "a"}, {ID: "b"}}}, Status: "confirmed"}},
+		{"ConfirmRelationship", TypeConfirmRelationship, &ConfirmRelationshipBody{Context: TAPContext, Type: TypeAgent, ID: "did:pkh:eip155:1:0x1234", For: NewForField("did:web:beneficiary.vasp"), Role: "SettlementAddress"}},
 		{"UpdatePolicies", TypeUpdatePolicies, &UpdatePoliciesBody{Context: TAPContext, Type: TypeUpdatePolicies, Policies: []Policy{{Type: "RequireAuthorization"}}}},
 		{"Connect", TypeConnect, &ConnectBody{Context: TAPContext, Type: TypeConnect, Requester: &Party{ID: "r"}, Principal: &Party{ID: "p"}, Agents: []Agent{{ID: "a"}}, Constraints: &TransactionConstraints{}}},
 	}

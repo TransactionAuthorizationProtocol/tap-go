@@ -224,27 +224,3 @@ func TestInvoice_JSONRoundTrip(t *testing.T) {
 		t.Errorf("LineItems mismatch: got %v", got.LineItems)
 	}
 }
-
-func TestRelationship_JSONRoundTrip(t *testing.T) {
-	rel := Relationship{
-		Type: "customer",
-		Parties: []Party{
-			{ID: "did:eg:alice"},
-			{ID: "did:eg:bob"},
-		},
-	}
-
-	data, err := json.Marshal(rel)
-	if err != nil {
-		t.Fatalf("marshal: %v", err)
-	}
-
-	var got Relationship
-	if err := json.Unmarshal(data, &got); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
-
-	if got.Type != "customer" || len(got.Parties) != 2 {
-		t.Errorf("round-trip mismatch: got %+v", got)
-	}
-}

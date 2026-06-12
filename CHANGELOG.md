@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING (TAIP-9):** Reshaped `ConfirmRelationshipBody` to match the TAIP-9
+  spec, whose confirmation payload is an `Agent` payload. The body is now flat:
+  `@context`, `@type` (set to `https://tap.rsvp/schema/1.0#Agent`), `@id` (the
+  DID of the agent being confirmed, REQUIRED), `for` (the DID of the entity the
+  agent acts for, REQUIRED), and `role` (OPTIONAL). The non-spec
+  `relationship` (`Relationship *Relationship`), `status`, `validFrom`,
+  `validUntil`, and `details` fields were removed. `NewConfirmRelationshipMessage`
+  now validates `@id` and `for` instead of `relationship` and `status`. Consumers
+  must read `body.ID` for the confirmed address and `body.For` for the owner
+  instead of `body.Relationship.Parties` / `body.Status`. Added the `TypeAgent`
+  constant for the body's JSON-LD `@type`.
+
+### Removed
+
+- The `Relationship` struct (`types.go`), which was used only by the now-reshaped
+  `ConfirmRelationshipBody`.
+
 ## [0.4.0] - 2026-05-05
 
 ### Changed

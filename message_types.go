@@ -4,6 +4,10 @@ const (
 	// TAPContext is the JSON-LD context for all TAP messages.
 	TAPContext = "https://tap.rsvp/schema/1.0"
 
+	// TypeAgent is the JSON-LD type for an Agent payload (TAIP-5). It is not a
+	// message type; it is the body @type of a ConfirmRelationship message.
+	TypeAgent = "https://tap.rsvp/schema/1.0#Agent"
+
 	// Transaction message types
 	TypeTransfer = "https://tap.rsvp/schema/1.0#Transfer"
 	TypePayment  = "https://tap.rsvp/schema/1.0#Payment"
