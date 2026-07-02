@@ -10,12 +10,13 @@ import (
 
 // AuthorizeBody represents the body of a TAP Authorize message (TAIP-4).
 type AuthorizeBody struct {
-	Context           string `json:"@context"`
-	Type              string `json:"@type"`
-	SettlementAddress string `json:"settlementAddress,omitempty"`
-	SettlementAsset   string `json:"settlementAsset,omitempty"`
-	Amount            string `json:"amount,omitempty"`
-	Expiry            string `json:"expiry,omitempty"`
+	Context           string   `json:"@context"`
+	Type              string   `json:"@type"`
+	SettlementAddress string   `json:"settlementAddress,omitempty"`
+	SettlementAsset   string   `json:"settlementAsset,omitempty"`
+	Amount            string   `json:"amount,omitempty"`
+	Expiry            string   `json:"expiry,omitempty"`
+	ApprovedTypes     []string `json:"approvedTypes,omitempty"`
 }
 
 func (b *AuthorizeBody) TAPType() string { return TypeAuthorize }

@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **TAIP-15 trust connections** (per the pending spec revision
+  [TAIPs#53](https://github.com/TransactionAuthorizationProtocol/TAIPs/pull/53)):
+  `ConnectBody` gains `ConnectionTypes` (`connectionTypes`) and `Action`
+  (`action`) fields, plus `ConnectionType*` and `ConnectAction*` constants.
+  `AuthorizeBody` gains `ApprovedTypes` (`approvedTypes`) for connection
+  approvals.
+
 ### Changed
 
+- `NewConnectMessage` validates `requester`/`principal`/`agents`/`constraints`
+  only for transactional connections (`connectionTypes` absent or containing
+  `"transaction"`). Trust connections (`ddq-access`, `mutual-trust`,
+  `whitelist`) omit them, and the four fields are now `omitempty` in JSON.
 - **BREAKING (TAIP-9):** Reshaped `ConfirmRelationshipBody` to match the TAIP-9
   spec, whose confirmation payload is an `Agent` payload. The body is now flat:
   `@context`, `@type` (set to `https://tap.rsvp/schema/1.0#Agent`), `@id` (the

@@ -141,3 +141,87 @@ func TestConnectBody_ParseBody(t *testing.T) {
 		t.Errorf("Requester.ID: got %q", cb.Requester.ID)
 	}
 }
+
+func TestNewConnectMessage_TrustConnection(t *testing.T) {
+	body := &ConnectBody{
+		ConnectionTypes: []string{ConnectionTypeDDQAccess},
+		Action:          ConnectActionEstablish,
+	}
+	msg, err := NewConnectMessage("did:web:req.example", []string{"did:web:owner.example"}, body)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(msg.Body, &raw); err != nil {
+		t.Fatalf("unmarshal body: %v", err)
+	}
+	for _, field := range []string{"requester", "principal", "agents", "constraints"} {
+		if _, ok := raw[field]; ok {
+			t.Errorf("%s must be omitted on a trust connection", field)
+		}
+	}
+	if string(raw["connectionTypes"]) != `["ddq-access"]` {
+		t.Errorf("connectionTypes: got %s", raw["connectionTypes"])
+	}
+	if string(raw["action"]) != `"establish"` {
+		t.Errorf("action: got %s", raw["action"])
+	}
+}
+
+func TestNewConnectMessage_TransactionalTypeRequiresFields(t *testing.T) {
+	body := &ConnectBody{
+		ConnectionTypes: []string{ConnectionTypeTransaction},
+	}
+	_, err := NewConnectMessage("from", nil, body)
+	if !errors.Is(err, ErrInvalidBody) {
+		t.Errorf("expected ErrInvalidBody, got %v", err)
+	}
+}
+
+func TestConnectBody_JSONRoundTrip_TrustFields(t *testing.T) {
+	body := ConnectBody{
+		Context:         TAPContext,
+		Type:            TypeConnect,
+		ConnectionTypes: []string{ConnectionTypeDDQAccess, ConnectionTypeMutualTrust},
+		Action:          ConnectActionUpdate,
+	}
+
+	data, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+
+	var got ConnectBody
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(got.ConnectionTypes) != 2 || got.ConnectionTypes[0] != ConnectionTypeDDQAccess {
+		t.Errorf("ConnectionTypes: got %v", got.ConnectionTypes)
+	}
+	if got.Action != ConnectActionUpdate {
+		t.Errorf("Action: got %q", got.Action)
+	}
+}
+
+func TestConnect_TestVectorEstablishDDQ(t *testing.T) {
+	data, err := os.ReadFile("TAIPs/test-vectors/connect/valid-establish-ddq.json")
+	if err != nil {
+		t.Skipf("test vector not available: %v", err)
+	}
+
+	var tv struct {
+		Body json.RawMessage `json:"body"`
+	}
+	if err := json.Unmarshal(data, &tv); err != nil {
+		t.Fatalf("unmarshal test vector: %v", err)
+	}
+
+	var body ConnectBody
+	if err := json.Unmarshal(tv.Body, &body); err != nil {
+		t.Fatalf("unmarshal body: %v", err)
+	}
+	if len(body.ConnectionTypes) == 0 || body.ConnectionTypes[0] != ConnectionTypeDDQAccess {
+		t.Errorf("ConnectionTypes: got %v", body.ConnectionTypes)
+	}
+}

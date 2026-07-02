@@ -105,3 +105,62 @@ func TestAuthorizeBody_ParseBody(t *testing.T) {
 		t.Errorf("SettlementAddress: got %q", ab.SettlementAddress)
 	}
 }
+
+func TestAuthorizeBody_JSONRoundTrip_ApprovedTypes(t *testing.T) {
+	body := AuthorizeBody{
+		Context:       TAPContext,
+		Type:          TypeAuthorize,
+		ApprovedTypes: []string{ConnectionTypeDDQAccess},
+	}
+
+	data, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+
+	var got AuthorizeBody
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(got.ApprovedTypes) != 1 || got.ApprovedTypes[0] != ConnectionTypeDDQAccess {
+		t.Errorf("ApprovedTypes: got %v", got.ApprovedTypes)
+	}
+}
+
+func TestAuthorizeBody_TransactionAuthorizeOmitsApprovedTypes(t *testing.T) {
+	msg, err := NewAuthorizeMessage("from", []string{"to"}, "thid",
+		&AuthorizeBody{SettlementAddress: "eip155:1:0x1234"})
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(msg.Body, &raw); err != nil {
+		t.Fatalf("unmarshal body: %v", err)
+	}
+	if _, ok := raw["approvedTypes"]; ok {
+		t.Error("approvedTypes must be omitted on a transaction Authorize")
+	}
+}
+
+func TestAuthorize_TestVectorConnectionApproved(t *testing.T) {
+	data, err := os.ReadFile("TAIPs/test-vectors/connect/valid-authorize-approved.json")
+	if err != nil {
+		t.Skipf("test vector not available: %v", err)
+	}
+
+	var tv struct {
+		Body json.RawMessage `json:"body"`
+	}
+	if err := json.Unmarshal(data, &tv); err != nil {
+		t.Fatalf("unmarshal test vector: %v", err)
+	}
+
+	var body AuthorizeBody
+	if err := json.Unmarshal(tv.Body, &body); err != nil {
+		t.Fatalf("unmarshal body: %v", err)
+	}
+	if len(body.ApprovedTypes) == 0 || body.ApprovedTypes[0] != ConnectionTypeDDQAccess {
+		t.Errorf("ApprovedTypes: got %v", body.ApprovedTypes)
+	}
+}
