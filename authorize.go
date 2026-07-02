@@ -10,16 +10,13 @@ import (
 
 // AuthorizeBody represents the body of a TAP Authorize message (TAIP-4).
 type AuthorizeBody struct {
-	Context           string `json:"@context"`
-	Type              string `json:"@type"`
-	SettlementAddress string `json:"settlementAddress,omitempty"`
-	SettlementAsset   string `json:"settlementAsset,omitempty"`
-	Amount            string `json:"amount,omitempty"`
-	Expiry            string `json:"expiry,omitempty"`
-	// ApprovedTypes echoes the approved connection types on a TAIP-15
-	// connection Authorize (a subset of the Connect's connectionTypes;
-	// TAIPs#53). Absent on transaction authorizations.
-	ApprovedTypes []string `json:"approvedTypes,omitempty"`
+	Context           string   `json:"@context"`
+	Type              string   `json:"@type"`
+	SettlementAddress string   `json:"settlementAddress,omitempty"`
+	SettlementAsset   string   `json:"settlementAsset,omitempty"`
+	Amount            string   `json:"amount,omitempty"`
+	Expiry            string   `json:"expiry,omitempty"`
+	ApprovedTypes     []string `json:"approvedTypes,omitempty"`
 }
 
 func (b *AuthorizeBody) TAPType() string { return TypeAuthorize }

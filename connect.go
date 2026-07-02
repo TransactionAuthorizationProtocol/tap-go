@@ -24,24 +24,17 @@ const (
 )
 
 // ConnectBody represents the body of a TAP Connect message (TAIP-15).
-// Transactional connections carry requester, principal, agents, and
-// constraints; trust connections (ddq-access, mutual-trust, whitelist)
-// omit them.
 type ConnectBody struct {
-	Context string `json:"@context"`
-	Type    string `json:"@type"`
-	// ConnectionTypes declares the connection purpose(s). REQUIRED by the
-	// TAIP-15 revision (TAIPs#53); a message without it predates the
-	// revision and is transactional by definition.
-	ConnectionTypes []string `json:"connectionTypes,omitempty"`
-	// Action is the connection lifecycle action; absent means "establish".
-	Action      string                  `json:"action,omitempty"`
-	Requester   *Party                  `json:"requester,omitempty"`
-	Principal   *Party                  `json:"principal,omitempty"`
-	Agents      []Agent                 `json:"agents,omitempty"`
-	Constraints *TransactionConstraints `json:"constraints,omitempty"`
-	Agreement   string                  `json:"agreement,omitempty"`
-	Expiry      string                  `json:"expiry,omitempty"`
+	Context         string                  `json:"@context"`
+	Type            string                  `json:"@type"`
+	ConnectionTypes []string                `json:"connectionTypes,omitempty"`
+	Action          string                  `json:"action,omitempty"`
+	Requester       *Party                  `json:"requester,omitempty"`
+	Principal       *Party                  `json:"principal,omitempty"`
+	Agents          []Agent                 `json:"agents,omitempty"`
+	Constraints     *TransactionConstraints `json:"constraints,omitempty"`
+	Agreement       string                  `json:"agreement,omitempty"`
+	Expiry          string                  `json:"expiry,omitempty"`
 }
 
 func (b *ConnectBody) TAPType() string { return TypeConnect }
