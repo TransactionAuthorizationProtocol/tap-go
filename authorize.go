@@ -16,6 +16,10 @@ type AuthorizeBody struct {
 	SettlementAsset   string `json:"settlementAsset,omitempty"`
 	Amount            string `json:"amount,omitempty"`
 	Expiry            string `json:"expiry,omitempty"`
+	// ApprovedTypes echoes the approved connection types on a TAIP-15
+	// connection Authorize (a subset of the Connect's connectionTypes;
+	// TAIPs#53). Absent on transaction authorizations.
+	ApprovedTypes []string `json:"approvedTypes,omitempty"`
 }
 
 func (b *AuthorizeBody) TAPType() string { return TypeAuthorize }
