@@ -9,38 +9,73 @@ import (
 	"strings"
 	"testing"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
-	"github.com/Notabene-id/go-didcomm/cli"
+	didcomm "github.com/notabene-id/go-didcomm"
+	"github.com/notabene-id/go-didcomm/softkey"
+
 	tap "github.com/TransactionAuthorizationProtocol/tap-go"
 )
 
-// generateIdentity creates a DID identity and writes files to dir.
-func generateIdentity(t *testing.T, dir string) *didcomm.DIDDocument {
+// generateIdentity creates a did:key identity, writes keys.json + did-doc.json
+// to dir, and returns both.
+func generateIdentity(t *testing.T, dir string) (*didcomm.DIDDocument, *didcomm.KeyMaterial) {
 	t.Helper()
-	doc, kp, err := didcomm.GenerateDIDKey()
+	doc, km, err := didcomm.GenerateDIDKey()
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	docBytes, err := cli.MarshalDIDDoc(doc)
+	docBytes, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
-	keyBytes, err := cli.MarshalKeyPair(kp)
+	keyBytes, err := json.MarshalIndent(km, "", "  ")
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "did-doc.json"), docBytes, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "did-doc.json"), docBytes, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(dir, "keys.json"), keyBytes, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	return doc
+	return doc, km
+}
+
+// packMessage packs msg in-process with the given profile, using a did:key
+// auto-resolving client. did:key identities need no DID-document overrides.
+func packMessage(t *testing.T, km *didcomm.KeyMaterial, msg *didcomm.Message, profile didcomm.Profile) []byte {
+	t.Helper()
+	store, err := softkey.New(km)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolver, _ := didcomm.DefaultResolver()
+	packed, err := didcomm.NewClient(resolver, store).Pack(context.Background(), msg, didcomm.WithProfile(profile))
+	if err != nil {
+		t.Fatalf("pack: %v", err)
+	}
+	return packed
+}
+
+// receiveViaCLI runs `tap receive` for the given key file and packed message.
+func receiveViaCLI(t *testing.T, bin, keyFile string, packed []byte) receiveOutput {
+	t.Helper()
+	cmd := exec.Command(bin, "receive", "--key-file", keyFile, "--message", string(packed))
+	out, err := cmd.Output()
+	if err != nil {
+		stderr := ""
+		if ee, ok := err.(*exec.ExitError); ok {
+			stderr = string(ee.Stderr)
+		}
+		t.Fatalf("receive failed: %s\n%s", err, stderr)
+	}
+	var result receiveOutput
+	if err := json.Unmarshal(out, &result); err != nil {
+		t.Fatalf("invalid receive output: %s\noutput: %s", err, out)
+	}
+	return result
 }
 
 func TestCLI_ReceiveMissingKeyFile(t *testing.T) {
@@ -57,143 +92,65 @@ func TestCLI_ReceiveMissingKeyFile(t *testing.T) {
 
 func TestCLI_Receive_SignedTransfer(t *testing.T) {
 	bin := buildBinary(t)
-	dir := t.TempDir()
+	aliceDir := filepath.Join(t.TempDir(), "alice")
+	aliceDoc, aliceKM := generateIdentity(t, aliceDir)
 
-	aliceDir := filepath.Join(dir, "alice")
-	aliceDoc := generateIdentity(t, aliceDir)
-
-	// Create a TAP transfer message
-	transferBody := &tap.TransferBody{
+	msg, err := tap.NewTransferMessage(aliceDoc.ID, []string{aliceDoc.ID}, &tap.TransferBody{
 		Asset:  "eip155:1/slip44:60",
 		Amount: "1.5",
 		Agents: []tap.Agent{{ID: aliceDoc.ID, Role: "OriginatingVASP"}},
-	}
-	msg, err := tap.NewTransferMessage(aliceDoc.ID, []string{aliceDoc.ID}, transferBody)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
+	packed := packMessage(t, aliceKM, msg, didcomm.ProfileSigned)
 
-	// Pack it signed
-	client, err := cli.BuildClient(
-		filepath.Join(aliceDir, "keys.json"),
-		filepath.Join(aliceDir, "did-doc.json"),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	packed, err := client.PackSigned(context.Background(), msg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Receive via CLI
-	receiveCmd := exec.Command(bin, "receive",
-		"--key-file", filepath.Join(aliceDir, "keys.json"),
-		"--did-doc", filepath.Join(aliceDir, "did-doc.json"),
-		"--message", string(packed),
-	)
-	out, err := receiveCmd.Output()
-	if err != nil {
-		ee, ok := err.(*exec.ExitError)
-		stderr := ""
-		if ok {
-			stderr = string(ee.Stderr)
-		}
-		t.Fatalf("receive failed: %s\n%s", err, stderr)
-	}
-
-	var result receiveOutput
-	if err := json.Unmarshal(out, &result); err != nil {
-		t.Fatalf("invalid receive output: %s\noutput: %s", err, out)
-	}
-
-	if !result.Signed {
-		t.Fatal("expected signed=true")
+	result := receiveViaCLI(t, bin, filepath.Join(aliceDir, "keys.json"), packed)
+	if result.SenderDID != aliceDoc.ID {
+		t.Fatalf("senderDid = %q, want %q", result.SenderDID, aliceDoc.ID)
 	}
 	if result.Encrypted {
 		t.Fatal("expected encrypted=false")
 	}
 	if result.BodyType != tap.TypeTransfer {
-		t.Fatalf("expected bodyType %s, got %s", tap.TypeTransfer, result.BodyType)
+		t.Fatalf("bodyType = %s, want %s", result.BodyType, tap.TypeTransfer)
 	}
 
-	// Verify body content
 	var body tap.TransferBody
 	if err := json.Unmarshal(result.Body, &body); err != nil {
 		t.Fatal(err)
 	}
-	if body.Asset != "eip155:1/slip44:60" {
-		t.Fatalf("expected asset eip155:1/slip44:60, got %s", body.Asset)
-	}
-	if body.Amount != "1.5" {
-		t.Fatalf("expected amount 1.5, got %s", body.Amount)
+	if body.Asset != "eip155:1/slip44:60" || body.Amount != "1.5" {
+		t.Fatalf("body = %+v", body)
 	}
 }
 
 func TestCLI_Receive_AuthcryptReject(t *testing.T) {
 	bin := buildBinary(t)
 	dir := t.TempDir()
+	aliceDoc, aliceKM := generateIdentity(t, filepath.Join(dir, "alice"))
+	bobDoc, _ := generateIdentity(t, filepath.Join(dir, "bob"))
 
-	aliceDir := filepath.Join(dir, "alice")
-	aliceDoc := generateIdentity(t, aliceDir)
-	bobDir := filepath.Join(dir, "bob")
-	bobDoc := generateIdentity(t, bobDir)
-
-	didDocs := filepath.Join(aliceDir, "did-doc.json") + "," + filepath.Join(bobDir, "did-doc.json")
-
-	// Create a TAP reject message
-	rejectBody := &tap.RejectBody{
+	msg, err := tap.NewRejectMessage(aliceDoc.ID, []string{bobDoc.ID}, "thread-456", &tap.RejectBody{
 		Reason: "compliance failure",
-	}
-	msg, err := tap.NewRejectMessage(aliceDoc.ID, []string{bobDoc.ID}, "thread-456", rejectBody)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
+	packed := packMessage(t, aliceKM, msg, didcomm.ProfileAuthcrypt1PUv3)
 
-	// Pack authcrypt
-	client, err := cli.BuildClient(filepath.Join(aliceDir, "keys.json"), didDocs)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	packed, err := client.PackAuthcrypt(context.Background(), msg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Receive via CLI with bob's keys
-	receiveCmd := exec.Command(bin, "receive",
-		"--key-file", filepath.Join(bobDir, "keys.json"),
-		"--did-doc", didDocs,
-		"--message", string(packed),
-	)
-	out, err := receiveCmd.Output()
-	if err != nil {
-		ee, ok := err.(*exec.ExitError)
-		stderr := ""
-		if ok {
-			stderr = string(ee.Stderr)
-		}
-		t.Fatalf("receive failed: %s\n%s", err, stderr)
-	}
-
-	var result receiveOutput
-	if err := json.Unmarshal(out, &result); err != nil {
-		t.Fatalf("invalid receive output: %s", err)
-	}
-
+	result := receiveViaCLI(t, bin, filepath.Join(dir, "bob", "keys.json"), packed)
 	if !result.Encrypted {
 		t.Fatal("expected encrypted=true")
 	}
-	if !result.Signed {
-		t.Fatal("expected signed=true")
+	if result.SenderDID != aliceDoc.ID {
+		t.Fatalf("senderDid = %q, want %q", result.SenderDID, aliceDoc.ID)
 	}
 	if result.Anonymous {
 		t.Fatal("expected anonymous=false")
 	}
 	if result.BodyType != tap.TypeReject {
-		t.Fatalf("expected bodyType %s, got %s", tap.TypeReject, result.BodyType)
+		t.Fatalf("bodyType = %s, want %s", result.BodyType, tap.TypeReject)
 	}
 
 	var body tap.RejectBody
@@ -201,61 +158,36 @@ func TestCLI_Receive_AuthcryptReject(t *testing.T) {
 		t.Fatal(err)
 	}
 	if body.Reason != "compliance failure" {
-		t.Fatalf("expected reason 'compliance failure', got %s", body.Reason)
+		t.Fatalf("reason = %s", body.Reason)
 	}
 }
 
-// TestCLI_MessagePipe_Transfer tests creating a message and piping to pack/unpack/receive.
+// TestCLI_MessagePipe_Transfer creates a message via the CLI, packs it
+// in-process, and receives it via the CLI.
 func TestCLI_MessagePipe_Transfer(t *testing.T) {
 	bin := buildBinary(t)
-	dir := t.TempDir()
+	aliceDir := filepath.Join(t.TempDir(), "alice")
+	aliceDoc, aliceKM := generateIdentity(t, aliceDir)
 
-	aliceDir := filepath.Join(dir, "alice")
-	aliceDoc := generateIdentity(t, aliceDir)
-
-	// Step 1: Create TAP message via CLI
 	body := `{"asset":"eip155:1/slip44:60","amount":"3.0","agents":[{"@id":"` + aliceDoc.ID + `","role":"OriginatingVASP"}]}`
-	msgCmd := exec.Command(bin, "message", "transfer",
-		"--from", aliceDoc.ID,
-		"--to", aliceDoc.ID,
-		"--body", body,
-	)
-	msgOut, err := msgCmd.Output()
+	msgOut, err := exec.Command(bin, "message", "transfer",
+		"--from", aliceDoc.ID, "--to", aliceDoc.ID, "--body", body,
+	).Output()
 	if err != nil {
 		t.Fatalf("message creation failed: %s", err)
 	}
 
-	// Step 2: Pack signed
-	packCmd := exec.Command(bin, "pack", "signed",
-		"--key-file", filepath.Join(aliceDir, "keys.json"),
-		"--did-doc", filepath.Join(aliceDir, "did-doc.json"),
-		"--message", string(msgOut),
-	)
-	packed, err := packCmd.Output()
-	if err != nil {
-		t.Fatalf("pack failed: %s", err)
+	var msg didcomm.Message
+	if err := json.Unmarshal(msgOut, &msg); err != nil {
+		t.Fatalf("parse message: %s", err)
 	}
+	packed := packMessage(t, aliceKM, &msg, didcomm.ProfileSigned)
 
-	// Step 3: Receive (unpack + TAP parse)
-	receiveCmd := exec.Command(bin, "receive",
-		"--key-file", filepath.Join(aliceDir, "keys.json"),
-		"--did-doc", filepath.Join(aliceDir, "did-doc.json"),
-		"--message", string(packed),
-	)
-	receiveOut, err := receiveCmd.Output()
-	if err != nil {
-		t.Fatalf("receive failed: %s", err)
-	}
-
-	var result receiveOutput
-	if err := json.Unmarshal(receiveOut, &result); err != nil {
-		t.Fatalf("invalid receive output: %s", err)
-	}
-
+	result := receiveViaCLI(t, bin, filepath.Join(aliceDir, "keys.json"), packed)
 	if result.BodyType != tap.TypeTransfer {
-		t.Fatalf("expected bodyType %s, got %s", tap.TypeTransfer, result.BodyType)
+		t.Fatalf("bodyType = %s, want %s", result.BodyType, tap.TypeTransfer)
 	}
-	if !result.Signed {
-		t.Fatal("expected signed=true")
+	if result.SenderDID != aliceDoc.ID {
+		t.Fatalf("senderDid = %q, want %q", result.SenderDID, aliceDoc.ID)
 	}
 }

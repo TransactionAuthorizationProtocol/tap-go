@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 // TAPBody is the interface implemented by all TAP message body types.

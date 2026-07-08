@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 func TestIsTAPMessage(t *testing.T) {

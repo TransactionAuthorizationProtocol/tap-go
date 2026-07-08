@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
 	tap "github.com/TransactionAuthorizationProtocol/tap-go"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 func buildBinary(t *testing.T) string {
@@ -693,25 +693,8 @@ func TestCLI_MessageTransfer_MultipleRecipients(t *testing.T) {
 }
 
 // TestCLI_DIDGenerateKey tests that DID commands work through the tap binary.
-func TestCLI_DIDGenerateKey(t *testing.T) {
-	bin := buildBinary(t)
-	dir := filepath.Join(t.TempDir(), "out")
-
-	cmd := exec.Command(bin, "did", "generate-key", "--output-dir", dir)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("did generate-key failed: %s\n%s", err, out)
-	}
-
-	_, statErr := os.Stat(filepath.Join(dir, "did-doc.json"))
-	if statErr != nil {
-		t.Fatal("did-doc.json not created")
-	}
-	_, statErr = os.Stat(filepath.Join(dir, "keys.json"))
-	if statErr != nil {
-		t.Fatal("keys.json not created")
-	}
-}
+// DID generation and envelope pack/unpack moved to the didcomm CLI, so the tap
+// CLI no longer exposes `did`/`pack`/`unpack`/`send`.
 
 // TestCLI_MessageTransfer_BodyValidation tests that body validation errors propagate.
 func TestCLI_MessageTransfer_BodyValidation(t *testing.T) {

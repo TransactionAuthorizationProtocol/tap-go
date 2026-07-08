@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/Notabene-id/go-didcomm/cli"
 
 	tap "github.com/TransactionAuthorizationProtocol/tap-go"
 )
@@ -17,37 +16,42 @@ type receiveOutput struct {
 	Message   json.RawMessage `json:"message"`
 	Body      json.RawMessage `json:"body"`
 	BodyType  string          `json:"bodyType"`
+	SenderDID string          `json:"senderDid"`
 	Encrypted bool            `json:"encrypted"`
-	Signed    bool            `json:"signed"`
 	Anonymous bool            `json:"anonymous"`
 }
 
 func runReceive(args []string) error {
 	fs := flag.NewFlagSet("receive", flag.ContinueOnError)
-	keyFile := fs.String("key-file", "", "path to JWK Set file with private keys (required)")
+	keyFile := fs.String("key-file", "", "path to keys.json (required)")
 	didDoc := fs.String("did-doc", "", "comma-separated DID document file paths")
 	message := fs.String("message", "-", "message input: - (stdin), @file, or inline JSON")
+	allowUnverified := fs.Bool("allow-unverified", false, "accept unauthenticated messages (sender NOT verified)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
 	if *keyFile == "" {
-		return fmt.Errorf("--key-file is required")
+		return errors.New("--key-file is required")
 	}
 
-	dcClient, err := cli.BuildClient(*keyFile, *didDoc)
+	dcClient, err := buildClient(*keyFile, *didDoc)
 	if err != nil {
 		return err
 	}
-
 	tapClient := tap.NewClient(dcClient)
 
-	data, err := cli.ReadMessageInput(*message)
+	data, err := readInput(*message)
 	if err != nil {
 		return fmt.Errorf("read message: %w", err)
 	}
 
-	result, err := tapClient.Receive(context.Background(), data)
+	ctx := context.Background()
+	receive := tapClient.Receive
+	if *allowUnverified {
+		receive = tapClient.ReceiveUnverified
+	}
+	result, err := receive(ctx, data)
 	if err != nil {
 		return fmt.Errorf("receive: %w", err)
 	}
@@ -56,7 +60,6 @@ func runReceive(args []string) error {
 	if err != nil {
 		return fmt.Errorf("marshal message: %w", err)
 	}
-
 	bodyBytes, err := json.Marshal(result.Body)
 	if err != nil {
 		return fmt.Errorf("marshal body: %w", err)
@@ -66,16 +69,14 @@ func runReceive(args []string) error {
 		Message:   msgBytes,
 		Body:      bodyBytes,
 		BodyType:  result.Body.TAPType(),
+		SenderDID: result.SenderDID,
 		Encrypted: result.Encrypted,
-		Signed:    result.Signed,
 		Anonymous: result.Anonymous,
 	}
-
 	outBytes, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal output: %w", err)
 	}
-
 	_, err = fmt.Fprintln(os.Stdout, string(outBytes))
 	return err
 }

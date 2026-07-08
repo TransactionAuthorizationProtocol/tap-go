@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 func TestNewClient(t *testing.T) {
@@ -43,20 +43,27 @@ func TestClient_ReceivePlainMessage(t *testing.T) {
 		t.Fatalf("marshal message: %v", err)
 	}
 
-	// Use a client with nil resolvers (plain messages don't need them)
+	// Use a client with nil resolvers (plain messages don't need them). Plain
+	// messages carry no verified sender, so Receive rejects them — accept it
+	// explicitly via ReceiveUnverified.
 	dc := didcomm.NewClient(nil, nil)
 	client := NewClient(dc)
 
-	result, err := client.Receive(context.TODO(), envelope)
+	if _, err := client.Receive(context.TODO(), envelope); err == nil {
+		t.Error("Receive should reject an unauthenticated plain message")
+	}
+
+	result, err := client.ReceiveUnverified(context.TODO(), envelope)
 	if err != nil {
-		t.Fatalf("Receive: %v", err)
+		t.Fatalf("ReceiveUnverified: %v", err)
 	}
 
 	if result.Message.ID != "test-123" {
 		t.Errorf("Message.ID: got %q", result.Message.ID)
 	}
-	if result.Encrypted || result.Signed || result.Anonymous {
-		t.Error("expected plain message flags")
+	if result.Encrypted || !result.Anonymous || result.SenderDID != "" {
+		t.Errorf("expected plain/anonymous flags, got encrypted=%v anonymous=%v sender=%q",
+			result.Encrypted, result.Anonymous, result.SenderDID)
 	}
 
 	tb, ok := result.Body.(*TransferBody)

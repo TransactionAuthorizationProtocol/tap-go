@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"slices"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
 	"github.com/google/uuid"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 // Connection types carried in ConnectBody.ConnectionTypes (TAIP-15).

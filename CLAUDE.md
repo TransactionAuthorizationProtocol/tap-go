@@ -86,7 +86,7 @@ Each message file follows the same pattern:
 
 ### Dependencies
 
-- `github.com/Notabene-id/go-didcomm` — DIDComm v2 (`Message`, `Client`, resolvers)
+- `github.com/notabene-id/go-didcomm` — DIDComm v2 (`Message`, `Client`, resolvers)
 - `github.com/google/uuid` — message ID generation
 
 ### Test vectors
