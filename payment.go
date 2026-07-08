@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
 	"github.com/google/uuid"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 // PaymentBody represents the body of a TAP Payment message (TAIP-14).

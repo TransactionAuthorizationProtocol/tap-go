@@ -1,6 +1,6 @@
 # tap-go
 
-Go library for the [Transaction Authorization Protocol (TAP)](https://tap.rsvp) — typed message wrappers for all 20 TAP message types, built on [go-didcomm](https://github.com/Notabene-id/go-didcomm).
+Go library for the [Transaction Authorization Protocol (TAP)](https://tap.rsvp) — typed message wrappers for all 20 TAP message types, built on [go-didcomm](https://github.com/notabene-id/go-didcomm).
 
 ## Installation
 
@@ -18,7 +18,7 @@ go install github.com/TransactionAuthorizationProtocol/tap-go/cmd/tap@latest
 
 ## How It Works
 
-`tap-go` sits on top of [go-didcomm](https://github.com/Notabene-id/go-didcomm), which handles DIDComm v2 message packing (signing, encryption) and unpacking. This library adds TAP-specific typed bodies, validation, and parsing.
+`tap-go` sits on top of [go-didcomm](https://github.com/notabene-id/go-didcomm), which handles DIDComm v2 message packing (signing, encryption) and unpacking. This library adds TAP-specific typed bodies, validation, and parsing.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -52,7 +52,7 @@ import (
     "fmt"
 
     tap "github.com/TransactionAuthorizationProtocol/tap-go"
-    didcomm "github.com/Notabene-id/go-didcomm"
+    didcomm "github.com/notabene-id/go-didcomm"
 )
 
 func main() {
@@ -285,7 +285,7 @@ body.TAPType() // e.g. "https://tap.rsvp/schema/1.0#Transfer"
 
 ## CLI
 
-The `tap` CLI wraps all [go-didcomm](https://github.com/Notabene-id/go-didcomm) CLI commands and adds TAP-specific message creation and receiving.
+The `tap` CLI wraps all [go-didcomm](https://github.com/notabene-id/go-didcomm) CLI commands and adds TAP-specific message creation and receiving.
 
 ### Commands
 

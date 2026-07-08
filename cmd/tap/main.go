@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/Notabene-id/go-didcomm/cli"
 )
 
-const version = "0.4.0"
+const version = "0.5.0"
 
 const usage = `tap - TAP (Transaction Authorization Protocol) CLI
 
@@ -15,17 +13,13 @@ Usage:
   tap <command> [options]
 
 Commands:
-  did generate-key                                          Generate a did:key identity
-  did generate-web --domain <d> [--path <p>]                Generate a did:web identity
-  pack signed    --key-file <f> [--send] [--did-doc <f>]    Sign a message (JWS)
-  pack anoncrypt [--send] [--did-doc <f>] [--message <m>]   Anonymous encrypt (JWE)
-  pack authcrypt --key-file <f> [--send] [--did-doc <f>]    Sign-then-encrypt
-  unpack         --key-file <f> [--did-doc <f>]             Unpack a message
-  send           --to <url> [--message <m>]                 HTTP POST pre-packed message
   message <type> --from <did> --to <did> [flags]            Create a TAP message
   receive        --key-file <f> [--did-doc <f>]             Unpack + parse TAP body
   version                                                   Print version
   help                                                      Print this help
+
+For DID generation and envelope pack/unpack/send use the "didcomm" CLI
+(github.com/notabene-id/go-didcomm/cmd/didcomm).
 
 TAP message types:
   Initiating:  transfer, payment, rfq, lock, connect
@@ -56,9 +50,9 @@ Examples:
   tap message transfer --from $ALICE --to $BOB \
     --body '{"asset":"eip155:1/slip44:60","amount":"1.5","agents":[{"@id":"'$ALICE'","role":"OriginatingVASP"}]}'
 
-  # Pipe: create message → pack → send
+  # Pipe: create message → pack (via the didcomm CLI) → send
   tap message transfer --from $ALICE --to $BOB --body @body.json | \
-    tap pack authcrypt --key-file alice/keys.json
+    didcomm pack --keys alice/keys.json --profile 1pu-v3
 
   # Receive: unpack + parse TAP body
   echo '<packed-message>' | tap receive --key-file bob/keys.json
@@ -72,14 +66,6 @@ func main() {
 
 	var err error
 	switch os.Args[1] {
-	case "did":
-		err = cli.RunDID(os.Args[2:])
-	case "pack":
-		err = cli.RunPack(os.Args[2:])
-	case "unpack":
-		err = cli.RunUnpack(os.Args[2:])
-	case "send":
-		err = cli.RunSend(os.Args[2:])
 	case "message":
 		err = runMessage(os.Args[2:])
 	case "receive":

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
 	"github.com/google/uuid"
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 // TransferBody represents the body of a TAP Transfer message (TAIP-3).

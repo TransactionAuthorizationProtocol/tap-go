@@ -3,24 +3,23 @@ module github.com/TransactionAuthorizationProtocol/tap-go
 go 1.26.2
 
 require (
-	github.com/Notabene-id/go-didcomm v0.4.0
 	github.com/google/uuid v1.6.0
+	github.com/notabene-id/go-didcomm v0.4.1-0.20260708110526-ba45976d2288
 )
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
-	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
+	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
-	github.com/lestrrat-go/dsig v1.0.0 // indirect
+	github.com/lestrrat-go/dsig v1.3.0 // indirect
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.2 // indirect
-	github.com/lestrrat-go/jwx/v3 v3.0.13 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
+	github.com/lestrrat-go/jwx/v3 v3.1.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
-	github.com/mr-tron/base58 v1.2.0 // indirect
+	github.com/mr-tron/base58 v1.3.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
-	github.com/valyala/fastjson v1.6.7 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
+	github.com/valyala/fastjson v1.6.10 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 )

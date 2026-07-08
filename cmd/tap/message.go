@@ -7,8 +7,7 @@ import (
 	"os"
 	"strings"
 
-	didcomm "github.com/Notabene-id/go-didcomm"
-	"github.com/Notabene-id/go-didcomm/cli"
+	didcomm "github.com/notabene-id/go-didcomm"
 
 	tap "github.com/TransactionAuthorizationProtocol/tap-go"
 )
@@ -73,7 +72,7 @@ func parseMessageFlags(name string, args []string, requireThid bool) (*messageFl
 		body = []byte("{}")
 	} else {
 		var err error
-		body, err = cli.ReadMessageInput(*bodyFlag)
+		body, err = readInput(*bodyFlag)
 		if err != nil {
 			return nil, fmt.Errorf("read body: %w", err)
 		}

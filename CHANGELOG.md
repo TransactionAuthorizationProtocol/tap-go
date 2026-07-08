@@ -33,11 +33,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   must read `body.ID` for the confirmed address and `body.For` for the owner
   instead of `body.Relationship.Parties` / `body.Status`. Added the `TypeAgent`
   constant for the body's JSON-LD `@type`.
+- **BREAKING:** `Client.Receive` now authenticates the sender — plain and
+  anonymously-encrypted messages are rejected. Use the new
+  `Client.ReceiveUnverified` to accept them.
+- **BREAKING:** `TAPResult` drops `Signed` and gains `SenderDID` (the
+  cryptographically verified sender, empty when unverified); `Anonymous` is now
+  derived from an empty `SenderDID`.
 
 ### Removed
 
 - The `Relationship` struct (`types.go`), which was used only by the now-reshaped
   `ConfirmRelationshipBody`.
+
+### Dependencies
+
+- Bumped `go-didcomm` to v0.5.0 (module path lowercased to
+  `github.com/notabene-id/go-didcomm`; pinned at
+  `v0.4.1-0.20260708110526-ba45976d2288`). Its `Unpack` now returns
+  `(*Message, *Metadata, error)` and exposes `UnpackUnverified`.
 
 ## [0.4.0] - 2026-05-05
 
