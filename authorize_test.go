@@ -43,7 +43,8 @@ func TestAuthorizeBody_JSONRoundTrip(t *testing.T) {
 	body := AuthorizeBody{
 		Context:           TAPContext,
 		Type:              TypeAuthorize,
-		SettlementAddress: "eip155:1:0x1234",
+		SettlementAddress: "xrpl:0:rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D8",
+		MemoTag:           "998877",
 		Amount:            "100.00",
 	}
 
@@ -58,6 +59,23 @@ func TestAuthorizeBody_JSONRoundTrip(t *testing.T) {
 	}
 	if got.SettlementAddress != body.SettlementAddress {
 		t.Errorf("mismatch: %+v", got)
+	}
+	if got.MemoTag != body.MemoTag {
+		t.Errorf("MemoTag mismatch: %+v", got)
+	}
+}
+
+func TestAuthorizeBody_MemoTagOmittedWhenEmpty(t *testing.T) {
+	data, err := json.Marshal(AuthorizeBody{Context: TAPContext, Type: TypeAuthorize})
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if _, ok := raw["memoTag"]; ok {
+		t.Errorf("memoTag should be omitted when empty: %s", data)
 	}
 }
 

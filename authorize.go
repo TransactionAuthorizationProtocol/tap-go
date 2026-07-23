@@ -14,6 +14,7 @@ type AuthorizeBody struct {
 	Type              string   `json:"@type"`
 	SettlementAddress string   `json:"settlementAddress,omitempty"`
 	SettlementAsset   string   `json:"settlementAsset,omitempty"`
+	MemoTag           string   `json:"memoTag,omitempty"`
 	Amount            string   `json:"amount,omitempty"`
 	Expiry            string   `json:"expiry,omitempty"`
 	ApprovedTypes     []string `json:"approvedTypes,omitempty"`
