@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `AuthorizeBody` gains `MemoTag` (`memoTag`) — a Notabene extension (TAIP-4
+  defines no memo-tag carriage) for the settlement memo/destination tag, as a
+  fallback to embedding it as a `:tag` suffix on `settlementAddress`.
+
 ## [0.6.0] - 2026-07-08
 
 ### Added
