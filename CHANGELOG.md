@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-23
+
 ### Added
 
 - `AuthorizeBody` gains `MemoTag` (`memoTag`) — a Notabene extension (TAIP-4
