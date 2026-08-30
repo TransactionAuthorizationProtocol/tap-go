@@ -224,3 +224,54 @@ func TestInvoice_JSONRoundTrip(t *testing.T) {
 		t.Errorf("LineItems mismatch: got %v", got.LineItems)
 	}
 }
+
+func TestAgent_OwnerlessOmitsForKey(t *testing.T) {
+	data, err := json.Marshal(Agent{ID: "did:pkh:eip155:1:0xabc", Role: "SettlementAddress"})
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if bytes.Contains(data, []byte(`"for"`)) {
+		t.Errorf("ownerless agent must omit the for key, got %s", data)
+	}
+
+	var got Agent
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if !got.For.IsEmpty() {
+		t.Errorf("round-tripped ownerless agent declares an owner: %v", got.For.Values())
+	}
+}
+
+func TestForField_UnmarshalNull(t *testing.T) {
+	var f ForField
+	if err := json.Unmarshal([]byte("null"), &f); err != nil {
+		t.Fatalf("unmarshal null: %v", err)
+	}
+	if !f.IsEmpty() {
+		t.Errorf("null must decode to no values, got %v", f.Values())
+	}
+	if f.String() != "" {
+		t.Errorf("null must decode to the empty string, got %q", f.String())
+	}
+}
+
+func TestAgent_ForNullDecodesToNoOwner(t *testing.T) {
+	var got Agent
+	if err := json.Unmarshal([]byte(`{"@id":"did:pkh:eip155:1:0xabc","for":null}`), &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if !got.For.IsEmpty() {
+		t.Errorf(`"for": null must decode to no owner, got %v`, got.For.Values())
+	}
+}
+
+func TestForField_EmptySliceOmitsKey(t *testing.T) {
+	data, err := json.Marshal(Agent{ID: "did:eg:agent", For: NewForField()})
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if bytes.Contains(data, []byte(`"for"`)) {
+		t.Errorf("empty ForField must omit the for key, got %s", data)
+	}
+}
