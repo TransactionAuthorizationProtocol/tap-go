@@ -24,7 +24,7 @@ type Agent struct {
 	ID          string   `json:"@id"`
 	Type        string   `json:"@type,omitempty"`
 	Role        string   `json:"role,omitempty"`
-	For         ForField `json:"for,omitempty"`
+	For         ForField `json:"for,omitzero"`
 	Name        string   `json:"name,omitempty"`
 	NameHash    string   `json:"nameHash,omitempty"`
 	LEICode     string   `json:"lei:leiCode,omitempty"`
@@ -66,6 +66,11 @@ func (f ForField) IsEmpty() bool {
 	return len(f.values) == 0
 }
 
+// IsZero reports whether the ForField has no values; omitzero reads it.
+func (f ForField) IsZero() bool {
+	return len(f.values) == 0
+}
+
 // MarshalJSON marshals the ForField as a string (single value) or array (multiple values).
 func (f ForField) MarshalJSON() ([]byte, error) {
 	if len(f.values) == 0 {
@@ -79,6 +84,13 @@ func (f ForField) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON unmarshals the ForField from a string or array of strings.
 func (f *ForField) UnmarshalJSON(data []byte) error {
+	// null into a non-pointer is a no-op returning no error, so the branch
+	// below would take it and produce [""].
+	if string(data) == "null" {
+		f.values = nil
+		return nil
+	}
+
 	// Try single string first
 	var single string
 	if err := json.Unmarshal(data, &single); err == nil {
