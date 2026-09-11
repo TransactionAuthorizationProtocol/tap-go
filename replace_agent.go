@@ -26,6 +26,9 @@ func NewReplaceAgentMessage(from string, to []string, thid string, body *Replace
 	if body.Replacement == nil {
 		return nil, fmt.Errorf("%w: missing replacement", ErrInvalidBody)
 	}
+	if err := body.Replacement.Validate(); err != nil {
+		return nil, err
+	}
 
 	body.Context = TAPContext
 	body.Type = TypeReplaceAgent

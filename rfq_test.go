@@ -37,7 +37,7 @@ func TestNewRFQMessage_MissingFromAssets(t *testing.T) {
 		ToAssets:   []string{"USD"},
 		FromAmount: "1.0",
 		Requester:  &Party{ID: "did:eg:alice"},
-		Agents:     []Agent{{ID: "did:web:exchange.example"}},
+		Agents:     []Agent{{ID: "did:web:exchange.example", For: NewForField("did:web:exchange.example")}},
 	}
 	_, err := NewRFQMessage("from", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -50,7 +50,7 @@ func TestNewRFQMessage_MissingAmounts(t *testing.T) {
 		FromAssets: []string{"ETH"},
 		ToAssets:   []string{"USD"},
 		Requester:  &Party{ID: "did:eg:alice"},
-		Agents:     []Agent{{ID: "did:web:exchange.example"}},
+		Agents:     []Agent{{ID: "did:web:exchange.example", For: NewForField("did:web:exchange.example")}},
 	}
 	_, err := NewRFQMessage("from", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -66,7 +66,7 @@ func TestRFQBody_JSONRoundTrip(t *testing.T) {
 		ToAssets:   []string{"USD"},
 		FromAmount: "1.0",
 		Requester:  &Party{ID: "did:eg:alice"},
-		Agents:     []Agent{{ID: "did:web:exchange.example"}},
+		Agents:     []Agent{{ID: "did:web:exchange.example", For: NewForField("did:web:exchange.example")}},
 	}
 
 	data, err := json.Marshal(body)
@@ -89,7 +89,7 @@ func TestRFQBody_ParseBody(t *testing.T) {
 		ToAssets:   []string{"USD"},
 		ToAmount:   "3000.00",
 		Requester:  &Party{ID: "did:eg:alice"},
-		Agents:     []Agent{{ID: "did:web:exchange.example"}},
+		Agents:     []Agent{{ID: "did:web:exchange.example", For: NewForField("did:web:exchange.example")}},
 	}
 	msg, err := NewRFQMessage("did:web:exchange.example", nil, body)
 	if err != nil {

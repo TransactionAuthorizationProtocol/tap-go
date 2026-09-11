@@ -43,6 +43,9 @@ func NewQuoteMessage(from string, to []string, thid string, body *QuoteBody) (*d
 	if len(body.Agents) == 0 {
 		return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 	}
+	if err := ValidateAgents(body.Agents); err != nil {
+		return nil, err
+	}
 	if body.ExpiresAt == "" {
 		return nil, fmt.Errorf("%w: missing expiresAt", ErrInvalidBody)
 	}

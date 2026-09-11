@@ -22,6 +22,9 @@ func NewAddAgentsMessage(from string, to []string, thid string, body *AddAgentsB
 	if len(body.Agents) == 0 {
 		return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 	}
+	if err := ValidateAgents(body.Agents); err != nil {
+		return nil, err
+	}
 
 	body.Context = TAPContext
 	body.Type = TypeAddAgents

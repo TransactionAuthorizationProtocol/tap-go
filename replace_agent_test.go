@@ -9,8 +9,12 @@ import (
 
 func TestNewReplaceAgentMessage(t *testing.T) {
 	body := &ReplaceAgentBody{
-		Original:    "did:pkh:eip155:1:0xabcda96D359eC26a11e2C2b3d8f8B8942d5Bfcdb",
-		Replacement: &Agent{ID: "did:pkh:eip155:1:0x1234a96D359eC26a11e2C2b3d8f8B8942d5Bfcdb", Role: "settlementAddress"},
+		Original: "did:pkh:eip155:1:0xabcda96D359eC26a11e2C2b3d8f8B8942d5Bfcdb",
+		Replacement: &Agent{
+			ID:   "did:pkh:eip155:1:0x1234a96D359eC26a11e2C2b3d8f8B8942d5Bfcdb",
+			Role: "SettlementAddress",
+			For:  NewForField("did:web:beneficiary.vasp"),
+		},
 	}
 	msg, err := NewReplaceAgentMessage("did:web:beneficiary.vasp", []string{"did:web:originator.vasp"}, "thread-1", body)
 	if err != nil {
@@ -26,7 +30,7 @@ func TestNewReplaceAgentMessage_MissingFields(t *testing.T) {
 		name string
 		body *ReplaceAgentBody
 	}{
-		{"missing original", &ReplaceAgentBody{Replacement: &Agent{ID: "did:web:new"}}},
+		{"missing original", &ReplaceAgentBody{Replacement: &Agent{ID: "did:web:new", For: NewForField("did:web:new")}}},
 		{"missing replacement", &ReplaceAgentBody{Original: "did:web:old"}},
 	}
 	for _, tt := range tests {
@@ -44,7 +48,7 @@ func TestReplaceAgentBody_JSONRoundTrip(t *testing.T) {
 		Context:     TAPContext,
 		Type:        TypeReplaceAgent,
 		Original:    "did:web:old-agent",
-		Replacement: &Agent{ID: "did:web:new-agent", Role: "settlementAddress"},
+		Replacement: &Agent{ID: "did:web:new-agent", Role: "SettlementAddress"},
 	}
 
 	data, err := json.Marshal(body)
@@ -84,13 +88,13 @@ func TestReplaceAgent_TestVectorValid(t *testing.T) {
 	if body.Original != "did:pkh:eip155:1:0xabcda96D359eC26a11e2C2b3d8f8B8942d5Bfcdb" {
 		t.Errorf("Original: got %q", body.Original)
 	}
-	if body.Replacement == nil || body.Replacement.Role != "settlementAddress" {
+	if body.Replacement == nil || body.Replacement.Role != "SettlementAddress" {
 		t.Errorf("Replacement: got %+v", body.Replacement)
 	}
 }
 
 func TestReplaceAgentBody_ParseBody(t *testing.T) {
-	body := &ReplaceAgentBody{Original: "did:web:old", Replacement: &Agent{ID: "did:web:new"}}
+	body := &ReplaceAgentBody{Original: "did:web:old", Replacement: &Agent{ID: "did:web:new", For: NewForField("did:web:new")}}
 	msg, err := NewReplaceAgentMessage("from", []string{"to"}, "thid", body)
 	if err != nil {
 		t.Fatalf("create: %v", err)

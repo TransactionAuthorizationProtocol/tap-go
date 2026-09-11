@@ -13,7 +13,7 @@ func TestNewQuoteMessage(t *testing.T) {
 		FromAmount: "1.0",
 		ToAmount:   "3000.00",
 		Provider:   &Party{ID: "did:web:provider.example"},
-		Agents:     []Agent{{ID: "did:web:provider.example"}},
+		Agents:     []Agent{{ID: "did:web:provider.example", For: NewForField("did:web:provider.example")}},
 		ExpiresAt:  "2025-03-22T15:00:00Z",
 	}
 
@@ -34,13 +34,13 @@ func TestNewQuoteMessage_MissingFields(t *testing.T) {
 		name string
 		body *QuoteBody
 	}{
-		{"missing fromAsset", &QuoteBody{ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"missing toAsset", &QuoteBody{FromAsset: "ETH", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"missing fromAmount", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"missing toAmount", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"missing provider", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"missing fromAsset", &QuoteBody{ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"missing toAsset", &QuoteBody{FromAsset: "ETH", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"missing fromAmount", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"missing toAmount", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"missing provider", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
 		{"missing agents", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"missing expiresAt", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a"}}}},
+		{"missing expiresAt", &QuoteBody{FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "did:eg:p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
 	}
 
 	for _, tt := range tests {
@@ -62,7 +62,7 @@ func TestQuoteBody_JSONRoundTrip(t *testing.T) {
 		FromAmount: "1.0",
 		ToAmount:   "3000.00",
 		Provider:   &Party{ID: "did:web:provider.example"},
-		Agents:     []Agent{{ID: "did:web:provider.example"}},
+		Agents:     []Agent{{ID: "did:web:provider.example", For: NewForField("did:web:provider.example")}},
 		ExpiresAt:  "2025-03-22T15:00:00Z",
 	}
 
@@ -87,7 +87,7 @@ func TestQuoteBody_ParseBody(t *testing.T) {
 		FromAmount: "1",
 		ToAmount:   "3000",
 		Provider:   &Party{ID: "did:web:provider"},
-		Agents:     []Agent{{ID: "did:web:provider"}},
+		Agents:     []Agent{{ID: "did:web:provider", For: NewForField("did:web:provider")}},
 		ExpiresAt:  "2025-01-01T00:00:00Z",
 	}
 	msg, err := NewQuoteMessage("from", nil, "thid", body)

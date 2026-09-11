@@ -1,6 +1,21 @@
 package tap
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
+// The TAIP-5 roles this package attaches meaning to. Others (CustodialService,
+// EscrowAgent, and anything a future TAIP adds) pass through untouched.
+//
+// TAIP-5 also allows `role` to be an array of strings. Agent.Role is a plain
+// string, so such an agent fails to unmarshal rather than validating wrongly —
+// supporting it needs a string-or-array type like ForField.
+const (
+	RoleSourceAddress     = "SourceAddress"
+	RoleSettlementAddress = "SettlementAddress"
+)
 
 // Party represents a real-world entity (legal or natural person) involved in a transaction.
 type Party struct {
@@ -35,6 +50,61 @@ type Agent struct {
 	Email       string   `json:"email,omitempty"`
 	Telephone   string   `json:"telephone,omitempty"`
 	ServiceURL  string   `json:"serviceUrl,omitempty"`
+}
+
+// Validate checks that the Agent can be placed by a receiver.
+//
+// TAIP-5 marks two attributes REQUIRED — `@id` and `for` — but has no way to
+// say "who owns this agent is not established yet", which is a state a real
+// flow passes through: an address may be seen before anybody has resolved who
+// custodies it. Rejecting those outright would mean inventing an owner, and an
+// invented `for` is worse than an absent one — a receiver stores it as a fact,
+// and downstream it is the difference between a self-hosted wallet (which must
+// prove ownership) and a custodied one (which must not).
+//
+// So the line is drawn where the sender cannot honestly be unsure:
+//   - `@id` is always required; an agent nobody can name is unusable.
+//   - `for` is required on the blockchain-address roles (`SourceAddress`,
+//     `SettlementAddress`). Whoever puts an address on a transaction knows
+//     whose address it is — that is the case TAIP-5 exists to pin down, and
+//     the one that was silently going out empty.
+//   - `for`, when present, must not hold empty DIDs, whatever the role.
+//
+// Agents whose `for` is genuinely not yet known travel without it.
+func (a Agent) Validate() error {
+	if a.ID == "" {
+		return fmt.Errorf("%w: agent missing @id", ErrInvalidBody)
+	}
+	if a.For.IsEmpty() && a.addressRole() {
+		return fmt.Errorf("%w: agent %s (%s) missing for", ErrInvalidBody, a.ID, a.Role)
+	}
+	for _, did := range a.For.Values() {
+		if did == "" {
+			return fmt.Errorf("%w: agent %s has an empty did in for", ErrInvalidBody, a.ID)
+		}
+	}
+	return nil
+}
+
+// addressRole reports whether this agent is a blockchain address rather than an
+// institution — the roles whose owner the sender necessarily knows.
+//
+// Matched case-insensitively although TAIP-5 mandates PascalCase: a caller who
+// mistypes the casing should still have a missing `for` caught, rather than
+// slipping past the check on a technicality.
+func (a Agent) addressRole() bool {
+	return strings.EqualFold(a.Role, RoleSourceAddress) ||
+		strings.EqualFold(a.Role, RoleSettlementAddress)
+}
+
+// ValidateAgents stops at the first violation.
+func ValidateAgents(agents []Agent) error {
+	for _, agent := range agents {
+		if err := agent.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ForField represents the "for" field on an Agent, which can be a single DID string

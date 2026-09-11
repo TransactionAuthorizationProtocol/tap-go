@@ -52,7 +52,7 @@ func TestUpdateAgentBody_JSONRoundTrip(t *testing.T) {
 }
 
 func TestUpdateAgentBody_ParseBody(t *testing.T) {
-	body := &UpdateAgentBody{Agent: &Agent{ID: "did:web:new"}}
+	body := &UpdateAgentBody{Agent: &Agent{ID: "did:web:new", For: NewForField("did:web:new")}}
 	msg, err := NewUpdateAgentMessage("from", []string{"to"}, "thid", body)
 	if err != nil {
 		t.Fatalf("create: %v", err)

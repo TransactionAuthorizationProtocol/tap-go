@@ -49,7 +49,7 @@ func TestNewTransferMessage(t *testing.T) {
 
 func TestNewTransferMessage_MissingAsset(t *testing.T) {
 	body := &TransferBody{
-		Agents: []Agent{{ID: "did:web:originator.vasp"}},
+		Agents: []Agent{{ID: "did:web:originator.vasp", For: NewForField("did:web:originator.vasp")}},
 	}
 	_, err := NewTransferMessage("did:web:originator.vasp", []string{"did:web:beneficiary.vasp"}, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -157,7 +157,7 @@ func TestTransferBody_TransactionValue(t *testing.T) {
 	// transactionValue is optional — confirm omitempty when nil
 	bodyNoValue := &TransferBody{
 		Asset:  "eip155:1/slip44:60",
-		Agents: []Agent{{ID: "did:web:originator.vasp"}},
+		Agents: []Agent{{ID: "did:web:originator.vasp", For: NewForField("did:web:originator.vasp")}},
 	}
 	msg2, err := NewTransferMessage("did:web:originator.vasp", nil, bodyNoValue)
 	if err != nil {

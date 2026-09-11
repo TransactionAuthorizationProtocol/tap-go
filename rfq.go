@@ -38,6 +38,9 @@ func NewRFQMessage(from string, to []string, body *RFQBody) (*didcomm.Message, e
 	if len(body.Agents) == 0 {
 		return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 	}
+	if err := ValidateAgents(body.Agents); err != nil {
+		return nil, err
+	}
 	if body.FromAmount == "" && body.ToAmount == "" {
 		return nil, fmt.Errorf("%w: missing fromAmount or toAmount", ErrInvalidBody)
 	}

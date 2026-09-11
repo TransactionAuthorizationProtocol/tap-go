@@ -83,7 +83,7 @@ func TestTAPResult_TypeAssertion(t *testing.T) {
 		Amount:   "100.00",
 		Currency: "USD",
 		Merchant: &Party{ID: "did:example:merchant"},
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 	}
 	rawBody, _ := json.Marshal(body)
 

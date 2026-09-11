@@ -13,10 +13,28 @@ type UpdatePartyBody struct {
 	Context       string `json:"@context"`
 	Type          string `json:"@type"`
 	Party         *Party `json:"party"`
-	Role          string `json:"role"`
+	PartyType     string `json:"partyType"`
 	PreviousParty *Party `json:"previousParty,omitempty"`
 	Reason        string `json:"reason,omitempty"`
 	Effective     string `json:"effective,omitempty"`
+}
+
+// UnmarshalJSON reads partyType, falling back to the "role" key that earlier
+// tap-go releases emitted in its place. Peers still on the old spelling keep
+// working; everything this library sends uses partyType.
+func (b *UpdatePartyBody) UnmarshalJSON(data []byte) error {
+	type alias UpdatePartyBody
+	aux := struct {
+		*alias
+		LegacyRole string `json:"role"`
+	}{alias: (*alias)(b)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if b.PartyType == "" {
+		b.PartyType = aux.LegacyRole
+	}
+	return nil
 }
 
 func (b *UpdatePartyBody) TAPType() string { return TypeUpdateParty }
@@ -26,8 +44,8 @@ func NewUpdatePartyMessage(from string, to []string, thid string, body *UpdatePa
 	if body.Party == nil {
 		return nil, fmt.Errorf("%w: missing party", ErrInvalidBody)
 	}
-	if body.Role == "" {
-		return nil, fmt.Errorf("%w: missing role", ErrInvalidBody)
+	if body.PartyType == "" {
+		return nil, fmt.Errorf("%w: missing partyType", ErrInvalidBody)
 	}
 
 	body.Context = TAPContext
