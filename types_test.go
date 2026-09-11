@@ -156,6 +156,28 @@ func TestPolicy_FromFieldRoundTrip(t *testing.T) {
 	}
 }
 
+func TestPolicy_ForFieldRoundTrip(t *testing.T) {
+	in := Policy{
+		Type: "RequireRelationshipConfirmation",
+		From: "did:pkh:eip155:1:0xabc",
+		For:  "did:web:originator.vasp.example",
+	}
+	data, err := json.Marshal(in)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if !bytes.Contains(data, []byte(`"for":"did:web:originator.vasp.example"`)) {
+		t.Fatalf("missing for in JSON: %s", string(data))
+	}
+	var out Policy
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if out.For != in.For {
+		t.Errorf("For = %q, want %q", out.For, in.For)
+	}
+}
+
 func TestTransactionConstraints_JSONRoundTrip(t *testing.T) {
 	tc := TransactionConstraints{
 		Purposes:         []string{"BEXP", "SUPP"},
