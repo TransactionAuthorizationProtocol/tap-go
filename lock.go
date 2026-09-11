@@ -41,6 +41,9 @@ func NewLockMessage(from string, to []string, body *LockBody) (*didcomm.Message,
 	if len(body.Agents) == 0 {
 		return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 	}
+	if err := ValidateAgents(body.Agents); err != nil {
+		return nil, err
+	}
 	if body.Asset == "" && body.Currency == "" {
 		return nil, fmt.Errorf("%w: missing asset or currency", ErrInvalidBody)
 	}

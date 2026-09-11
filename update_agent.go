@@ -25,6 +25,9 @@ func NewUpdateAgentMessage(from string, to []string, thid string, body *UpdateAg
 	if body.Agent == nil {
 		return nil, fmt.Errorf("%w: missing agent", ErrInvalidBody)
 	}
+	if err := body.Agent.Validate(); err != nil {
+		return nil, err
+	}
 
 	body.Context = TAPContext
 	body.Type = TypeUpdateAgent

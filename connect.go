@@ -53,6 +53,9 @@ func NewConnectMessage(from string, to []string, body *ConnectBody) (*didcomm.Me
 		if len(body.Agents) == 0 {
 			return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 		}
+		if err := ValidateAgents(body.Agents); err != nil {
+			return nil, err
+		}
 		if body.Constraints == nil {
 			return nil, fmt.Errorf("%w: missing constraints", ErrInvalidBody)
 		}

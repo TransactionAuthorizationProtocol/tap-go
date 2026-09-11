@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING** `Agent.For` (`for`) is enforced on the blockchain-address roles
+  (`SourceAddress`, `SettlementAddress`). `NewTransferMessage`,
+  `NewPaymentMessage`, `NewConnectMessage`, `NewQuoteMessage`, `NewRFQMessage`,
+  `NewAddAgentsMessage`, `NewLockMessage`, `NewUpdateAgentMessage` and
+  `NewReplaceAgentMessage` reject an address agent that omits it, and reject an
+  empty DID inside `for` whatever the role.
+
+  [TAIP-5] marks `for` REQUIRED on every agent, but provides no way to express
+  that who owns an agent is not established yet — a state real flows pass
+  through, since an address can be seen before anybody has resolved who
+  custodies it. Enforcing the letter of the spec would mean inventing owners,
+  and an invented `for` is worse than an absent one: a receiver stores it as
+  fact, and it decides whether a wallet is treated as self-hosted (must prove
+  ownership) or custodied (must not). So `for` is enforced where the sender
+  cannot honestly be unsure — whoever supplies an address knows whose it is —
+  and institutional agents may still travel without one.
+
+  Validation is send-side only: `ParseBody` accepts inbound agents that omit
+  `for` regardless of role, so peers that do not set it keep working.
+- **BREAKING** `UpdatePartyBody.Role` is renamed to `PartyType` and retagged
+  `partyType`, per [TAIP-6]. The previous `role` spelling matched no other
+  implementation, so these messages were silently ignored by conformant peers.
+  Inbound bodies still accept `role` as a fallback.
+
+### Added
+
+- `Agent.Validate()` and `ValidateAgents()` report TAIP-5 violations.
+
+[TAIP-5]: https://github.com/TransactionAuthorizationProtocol/TAIPs/blob/main/TAIPs/taip-5.md
+[TAIP-6]: https://github.com/TransactionAuthorizationProtocol/TAIPs/blob/main/TAIPs/taip-6.md
+
 ## [0.7.0] - 2026-07-23
 
 ### Added

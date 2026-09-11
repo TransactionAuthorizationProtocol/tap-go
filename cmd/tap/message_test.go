@@ -137,7 +137,7 @@ func TestCLI_MessageMissingThid(t *testing.T) {
 
 func TestCLI_MessageTransfer(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"asset":"eip155:1/slip44:60","amount":"1.5","agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"asset":"eip155:1/slip44:60","amount":"1.5","agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "transfer",
 		"--from", "did:key:z1",
@@ -190,7 +190,7 @@ func TestCLI_MessageTransfer_FileBody(t *testing.T) {
 	dir := t.TempDir()
 
 	bodyFile := filepath.Join(dir, "body.json")
-	body := `{"asset":"eip155:1/slip44:60","amount":"2.0","agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"asset":"eip155:1/slip44:60","amount":"2.0","agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 	if err := os.WriteFile(bodyFile, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +216,7 @@ func TestCLI_MessageTransfer_FileBody(t *testing.T) {
 
 func TestCLI_MessagePayment(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"amount":"100","currency":"USD","merchant":{"@id":"did:key:z2"},"agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"amount":"100","currency":"USD","merchant":{"@id":"did:key:z2"},"agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "payment",
 		"--from", "did:key:z1",
@@ -239,7 +239,7 @@ func TestCLI_MessagePayment(t *testing.T) {
 
 func TestCLI_MessageRFQ(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"fromAssets":["eip155:1/slip44:60"],"toAssets":["eip155:1/slip44:0"],"fromAmount":"1.0","requester":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"fromAssets":["eip155:1/slip44:60"],"toAssets":["eip155:1/slip44:0"],"fromAmount":"1.0","requester":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "rfq",
 		"--from", "did:key:z1",
@@ -262,7 +262,7 @@ func TestCLI_MessageRFQ(t *testing.T) {
 
 func TestCLI_MessageLock(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"asset":"eip155:1/slip44:60","amount":"5.0","originator":{"@id":"did:key:z1"},"beneficiary":{"@id":"did:key:z2"},"expiry":"2025-12-31T23:59:59Z","agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"asset":"eip155:1/slip44:60","amount":"5.0","originator":{"@id":"did:key:z1"},"beneficiary":{"@id":"did:key:z2"},"expiry":"2025-12-31T23:59:59Z","agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "lock",
 		"--from", "did:key:z1",
@@ -285,7 +285,7 @@ func TestCLI_MessageLock(t *testing.T) {
 
 func TestCLI_MessageConnect(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"requester":{"@id":"did:key:z1"},"principal":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}],"constraints":{"purposes":["travel"]}}`
+	body := `{"requester":{"@id":"did:key:z1"},"principal":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}],"constraints":{"purposes":["travel"]}}`
 
 	cmd := exec.Command(bin, "message", "connect",
 		"--from", "did:key:z1",
@@ -475,7 +475,7 @@ func TestCLI_MessageCapture(t *testing.T) {
 
 func TestCLI_MessageQuote(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"fromAsset":"eip155:1/slip44:60","toAsset":"eip155:1/slip44:0","fromAmount":"1.0","toAmount":"2000.0","provider":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","role":"Provider"}],"expiresAt":"2025-12-31T23:59:59Z"}`
+	body := `{"fromAsset":"eip155:1/slip44:60","toAsset":"eip155:1/slip44:0","fromAmount":"1.0","toAmount":"2000.0","provider":{"@id":"did:key:z1"},"agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"Provider"}],"expiresAt":"2025-12-31T23:59:59Z"}`
 
 	cmd := exec.Command(bin, "message", "quote",
 		"--from", "did:key:z1",
@@ -499,7 +499,7 @@ func TestCLI_MessageQuote(t *testing.T) {
 
 func TestCLI_MessageAddAgents(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"agents":[{"@id":"did:key:z3","role":"IntermediaryVASP"}]}`
+	body := `{"agents":[{"@id":"did:key:z3","for":"did:key:z1","role":"IntermediaryVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "add-agents",
 		"--from", "did:key:z1",
@@ -547,7 +547,7 @@ func TestCLI_MessageRemoveAgent(t *testing.T) {
 
 func TestCLI_MessageReplaceAgent(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"original":"did:key:z3","replacement":{"@id":"did:key:z4","role":"IntermediaryVASP"}}`
+	body := `{"original":"did:key:z3","replacement":{"@id":"did:key:z4","for":"did:key:z1","role":"IntermediaryVASP"}}`
 
 	cmd := exec.Command(bin, "message", "replace-agent",
 		"--from", "did:key:z1",
@@ -571,7 +571,7 @@ func TestCLI_MessageReplaceAgent(t *testing.T) {
 
 func TestCLI_MessageUpdateAgent(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"agent":{"@id":"did:key:z3","role":"IntermediaryVASP"}}`
+	body := `{"agent":{"@id":"did:key:z3","for":"did:key:z1","role":"IntermediaryVASP"}}`
 
 	cmd := exec.Command(bin, "message", "update-agent",
 		"--from", "did:key:z1",
@@ -668,7 +668,7 @@ func TestCLI_MessageConfirmRelationship(t *testing.T) {
 // TestCLI_MessageTransfer_MultipleRecipients tests comma-separated --to flag.
 func TestCLI_MessageTransfer_MultipleRecipients(t *testing.T) {
 	bin := buildBinary(t)
-	body := `{"asset":"eip155:1/slip44:60","amount":"1.0","agents":[{"@id":"did:key:z1","role":"OriginatingVASP"}]}`
+	body := `{"asset":"eip155:1/slip44:60","amount":"1.0","agents":[{"@id":"did:key:z1","for":"did:key:z1","role":"OriginatingVASP"}]}`
 
 	cmd := exec.Command(bin, "message", "transfer",
 		"--from", "did:key:z1",
@@ -700,7 +700,7 @@ func TestCLI_MessageTransfer_MultipleRecipients(t *testing.T) {
 func TestCLI_MessageTransfer_BodyValidation(t *testing.T) {
 	bin := buildBinary(t)
 	// Missing required "asset" field
-	body := `{"amount":"1.0","agents":[{"@id":"did:key:z1"}]}`
+	body := `{"amount":"1.0","agents":[{"@id":"did:key:z1","for":"did:key:z1"}]}`
 
 	cmd := exec.Command(bin, "message", "transfer",
 		"--from", "did:key:z1",

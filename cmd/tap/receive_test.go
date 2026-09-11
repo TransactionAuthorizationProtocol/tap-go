@@ -98,7 +98,7 @@ func TestCLI_Receive_SignedTransfer(t *testing.T) {
 	msg, err := tap.NewTransferMessage(aliceDoc.ID, []string{aliceDoc.ID}, &tap.TransferBody{
 		Asset:  "eip155:1/slip44:60",
 		Amount: "1.5",
-		Agents: []tap.Agent{{ID: aliceDoc.ID, Role: "OriginatingVASP"}},
+		Agents: []tap.Agent{{ID: aliceDoc.ID, For: tap.NewForField(aliceDoc.ID), Role: "OriginatingVASP"}},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -169,7 +169,7 @@ func TestCLI_MessagePipe_Transfer(t *testing.T) {
 	aliceDir := filepath.Join(t.TempDir(), "alice")
 	aliceDoc, aliceKM := generateIdentity(t, aliceDir)
 
-	body := `{"asset":"eip155:1/slip44:60","amount":"3.0","agents":[{"@id":"` + aliceDoc.ID + `","role":"OriginatingVASP"}]}`
+	body := `{"asset":"eip155:1/slip44:60","amount":"3.0","agents":[{"@id":"` + aliceDoc.ID + `","for":"` + aliceDoc.ID + `","role":"OriginatingVASP"}]}`
 	msgOut, err := exec.Command(bin, "message", "transfer",
 		"--from", aliceDoc.ID, "--to", aliceDoc.ID, "--body", body,
 	).Output()

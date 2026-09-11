@@ -15,7 +15,7 @@ func TestNewLockMessage(t *testing.T) {
 		Beneficiary: &Party{ID: "did:web:seller.example"},
 		Expiry:      "2024-03-15T00:00:00Z",
 		Agents: []Agent{
-			{ID: "did:web:escrow-service.example", Role: "EscrowAgent"},
+			{ID: "did:web:escrow-service.example", Role: "EscrowAgent", For: NewForField("did:web:buyer.example")},
 		},
 	}
 
@@ -35,7 +35,7 @@ func TestNewLockMessage_MissingFields(t *testing.T) {
 		Originator:  &Party{ID: "did:web:buyer"},
 		Beneficiary: &Party{ID: "did:web:seller"},
 		Expiry:      "2024-03-15T00:00:00Z",
-		Agents:      []Agent{{ID: "did:web:escrow", Role: "EscrowAgent"}},
+		Agents:      []Agent{{ID: "did:web:escrow", Role: "EscrowAgent", For: NewForField("did:web:buyer")}},
 	}
 
 	tests := []struct {
@@ -126,7 +126,7 @@ func TestLockBody_ParseBody(t *testing.T) {
 		Originator:  &Party{ID: "did:web:buyer"},
 		Beneficiary: &Party{ID: "did:web:seller"},
 		Expiry:      "2024-12-31T00:00:00Z",
-		Agents:      []Agent{{ID: "did:web:escrow", Role: "EscrowAgent"}},
+		Agents:      []Agent{{ID: "did:web:escrow", Role: "EscrowAgent", For: NewForField("did:web:buyer")}},
 	}
 	msg, err := NewLockMessage("did:web:buyer", []string{"did:web:escrow"}, body)
 	if err != nil {

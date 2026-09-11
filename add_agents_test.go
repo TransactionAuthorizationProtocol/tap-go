@@ -80,7 +80,7 @@ func TestAddAgents_TestVectorValid(t *testing.T) {
 }
 
 func TestAddAgentsBody_ParseBody(t *testing.T) {
-	body := &AddAgentsBody{Agents: []Agent{{ID: "did:web:new"}}}
+	body := &AddAgentsBody{Agents: []Agent{{ID: "did:web:new", For: NewForField("did:web:new")}}}
 	msg, err := NewAddAgentsMessage("from", []string{"to"}, "thid", body)
 	if err != nil {
 		t.Fatalf("create: %v", err)

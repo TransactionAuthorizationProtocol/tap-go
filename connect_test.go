@@ -32,7 +32,7 @@ func TestNewConnectMessage_MissingFields(t *testing.T) {
 	base := ConnectBody{
 		Requester:   &Party{ID: "did:web:req"},
 		Principal:   &Party{ID: "did:web:princ"},
-		Agents:      []Agent{{ID: "did:web:agent"}},
+		Agents:      []Agent{{ID: "did:web:agent", For: NewForField("did:web:agent")}},
 		Constraints: &TransactionConstraints{},
 	}
 
@@ -63,7 +63,7 @@ func TestConnectBody_JSONRoundTrip(t *testing.T) {
 		Type:      TypeConnect,
 		Requester: &Party{ID: "did:web:req"},
 		Principal: &Party{ID: "did:web:princ"},
-		Agents:    []Agent{{ID: "did:web:agent"}},
+		Agents:    []Agent{{ID: "did:web:agent", For: NewForField("did:web:agent")}},
 		Constraints: &TransactionConstraints{
 			Purposes: []string{"BEXP"},
 			Limits:   &Limits{PerTransaction: "10000.00", Currency: "USD"},
@@ -121,7 +121,7 @@ func TestConnectBody_ParseBody(t *testing.T) {
 	body := &ConnectBody{
 		Requester:   &Party{ID: "did:web:req"},
 		Principal:   &Party{ID: "did:web:princ"},
-		Agents:      []Agent{{ID: "did:web:agent"}},
+		Agents:      []Agent{{ID: "did:web:agent", For: NewForField("did:web:agent")}},
 		Constraints: &TransactionConstraints{Purposes: []string{"BEXP"}},
 	}
 	msg, err := NewConnectMessage("did:web:req", []string{"did:web:vasp"}, body)

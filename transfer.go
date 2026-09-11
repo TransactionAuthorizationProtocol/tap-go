@@ -42,6 +42,9 @@ func NewTransferMessage(from string, to []string, body *TransferBody) (*didcomm.
 	if len(body.Agents) == 0 {
 		return nil, fmt.Errorf("%w: missing agents", ErrInvalidBody)
 	}
+	if err := ValidateAgents(body.Agents); err != nil {
+		return nil, err
+	}
 
 	body.Context = TAPContext
 	body.Type = TypeTransfer

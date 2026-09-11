@@ -38,7 +38,7 @@ func TestNewPaymentMessage_MissingAmount(t *testing.T) {
 	body := &PaymentBody{
 		Currency: "EUR",
 		Merchant: &Party{ID: "did:example:merchant"},
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 	}
 	_, err := NewPaymentMessage("did:example:merchant", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -50,7 +50,7 @@ func TestNewPaymentMessage_MissingMerchant(t *testing.T) {
 	body := &PaymentBody{
 		Amount:   "250.00",
 		Currency: "EUR",
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 	}
 	_, err := NewPaymentMessage("did:example:merchant", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -62,7 +62,7 @@ func TestNewPaymentMessage_MissingAssetAndCurrency(t *testing.T) {
 	body := &PaymentBody{
 		Amount:   "250.00",
 		Merchant: &Party{ID: "did:example:merchant"},
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 	}
 	_, err := NewPaymentMessage("did:example:merchant", nil, body)
 	if !errors.Is(err, ErrInvalidBody) {
@@ -77,7 +77,7 @@ func TestPaymentBody_JSONRoundTrip(t *testing.T) {
 		Amount:   "250.00",
 		Currency: "EUR",
 		Merchant: &Party{ID: "did:example:merchant", Name: "Shop"},
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 		SupportedAssets: []any{
 			"eip155:1/erc20:0xA0b86991c53D94fa4C0bCBf0C1C4DF2F15F1b7A8",
 		},
@@ -132,7 +132,7 @@ func TestPaymentBody_ParseBody(t *testing.T) {
 		Amount:   "100.00",
 		Currency: "USD",
 		Merchant: &Party{ID: "did:example:merchant"},
-		Agents:   []Agent{{ID: "did:example:merchant"}},
+		Agents:   []Agent{{ID: "did:example:merchant", For: NewForField("did:example:merchant")}},
 	}
 	msg, err := NewPaymentMessage("did:example:merchant", []string{"did:example:customer"}, body)
 	if err != nil {

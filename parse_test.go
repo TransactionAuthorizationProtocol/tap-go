@@ -51,11 +51,11 @@ func TestParseBody_AllTypes(t *testing.T) {
 		msgType string
 		body    any
 	}{
-		{"Transfer", TypeTransfer, &TransferBody{Context: TAPContext, Type: TypeTransfer, Asset: "ETH", Agents: []Agent{{ID: "a"}}}},
-		{"Payment", TypePayment, &PaymentBody{Context: TAPContext, Type: TypePayment, Amount: "100", Currency: "USD", Merchant: &Party{ID: "m"}, Agents: []Agent{{ID: "a"}}}},
-		{"RFQ", TypeRFQ, &RFQBody{Context: TAPContext, Type: TypeRFQ, FromAssets: []string{"ETH"}, ToAssets: []string{"USD"}, FromAmount: "1", Requester: &Party{ID: "r"}, Agents: []Agent{{ID: "a"}}}},
-		{"Quote", TypeQuote, &QuoteBody{Context: TAPContext, Type: TypeQuote, FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "p"}, Agents: []Agent{{ID: "a"}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
-		{"Lock", TypeLock, &LockBody{Context: TAPContext, Type: TypeLock, Asset: "ETH", Amount: "100", Originator: &Party{ID: "o"}, Beneficiary: &Party{ID: "b"}, Expiry: "2025-01-01T00:00:00Z", Agents: []Agent{{ID: "a"}}}},
+		{"Transfer", TypeTransfer, &TransferBody{Context: TAPContext, Type: TypeTransfer, Asset: "ETH", Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
+		{"Payment", TypePayment, &PaymentBody{Context: TAPContext, Type: TypePayment, Amount: "100", Currency: "USD", Merchant: &Party{ID: "m"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
+		{"RFQ", TypeRFQ, &RFQBody{Context: TAPContext, Type: TypeRFQ, FromAssets: []string{"ETH"}, ToAssets: []string{"USD"}, FromAmount: "1", Requester: &Party{ID: "r"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
+		{"Quote", TypeQuote, &QuoteBody{Context: TAPContext, Type: TypeQuote, FromAsset: "ETH", ToAsset: "USD", FromAmount: "1", ToAmount: "3000", Provider: &Party{ID: "p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, ExpiresAt: "2025-01-01T00:00:00Z"}},
+		{"Lock", TypeLock, &LockBody{Context: TAPContext, Type: TypeLock, Asset: "ETH", Amount: "100", Originator: &Party{ID: "o"}, Beneficiary: &Party{ID: "b"}, Expiry: "2025-01-01T00:00:00Z", Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
 		{"Authorize", TypeAuthorize, &AuthorizeBody{Context: TAPContext, Type: TypeAuthorize}},
 		{"AuthorizationRequired", TypeAuthorizationRequired, &AuthorizationRequiredBody{Context: TAPContext, Type: TypeAuthorizationRequired, AuthorizationURL: "https://example.com", Expires: "2025-01-01T00:00:00Z"}},
 		{"Settle", TypeSettle, &SettleBody{Context: TAPContext, Type: TypeSettle, SettlementAddress: "eip155:1:0x1234"}},
@@ -63,14 +63,14 @@ func TestParseBody_AllTypes(t *testing.T) {
 		{"Cancel", TypeCancel, &CancelBody{Context: TAPContext, Type: TypeCancel, By: "originator"}},
 		{"Revert", TypeRevert, &RevertBody{Context: TAPContext, Type: TypeRevert, SettlementAddress: "eip155:1:0x1234", Reason: "test"}},
 		{"Capture", TypeCapture, &CaptureBody{Context: TAPContext, Type: TypeCapture}},
-		{"UpdateAgent", TypeUpdateAgent, &UpdateAgentBody{Context: TAPContext, Type: TypeUpdateAgent, Agent: &Agent{ID: "a"}}},
-		{"UpdateParty", TypeUpdateParty, &UpdatePartyBody{Context: TAPContext, Type: TypeUpdateParty, Party: &Party{ID: "p"}, Role: "originator"}},
-		{"AddAgents", TypeAddAgents, &AddAgentsBody{Context: TAPContext, Type: TypeAddAgents, Agents: []Agent{{ID: "a"}}}},
-		{"ReplaceAgent", TypeReplaceAgent, &ReplaceAgentBody{Context: TAPContext, Type: TypeReplaceAgent, Original: "old", Replacement: &Agent{ID: "new"}}},
+		{"UpdateAgent", TypeUpdateAgent, &UpdateAgentBody{Context: TAPContext, Type: TypeUpdateAgent, Agent: &Agent{ID: "a", For: NewForField("a")}}},
+		{"UpdateParty", TypeUpdateParty, &UpdatePartyBody{Context: TAPContext, Type: TypeUpdateParty, Party: &Party{ID: "p"}, PartyType: "originator"}},
+		{"AddAgents", TypeAddAgents, &AddAgentsBody{Context: TAPContext, Type: TypeAddAgents, Agents: []Agent{{ID: "a", For: NewForField("a")}}}},
+		{"ReplaceAgent", TypeReplaceAgent, &ReplaceAgentBody{Context: TAPContext, Type: TypeReplaceAgent, Original: "old", Replacement: &Agent{ID: "new", For: NewForField("new")}}},
 		{"RemoveAgent", TypeRemoveAgent, &RemoveAgentBody{Context: TAPContext, Type: TypeRemoveAgent, Agent: "did:web:old"}},
 		{"ConfirmRelationship", TypeConfirmRelationship, &ConfirmRelationshipBody{Context: TAPContext, Type: TypeAgent, ID: "did:pkh:eip155:1:0x1234", For: NewForField("did:web:beneficiary.vasp"), Role: "SettlementAddress"}},
 		{"UpdatePolicies", TypeUpdatePolicies, &UpdatePoliciesBody{Context: TAPContext, Type: TypeUpdatePolicies, Policies: []Policy{{Type: "RequireAuthorization"}}}},
-		{"Connect", TypeConnect, &ConnectBody{Context: TAPContext, Type: TypeConnect, Requester: &Party{ID: "r"}, Principal: &Party{ID: "p"}, Agents: []Agent{{ID: "a"}}, Constraints: &TransactionConstraints{}}},
+		{"Connect", TypeConnect, &ConnectBody{Context: TAPContext, Type: TypeConnect, Requester: &Party{ID: "r"}, Principal: &Party{ID: "p"}, Agents: []Agent{{ID: "a", For: NewForField("a")}}, Constraints: &TransactionConstraints{}}},
 	}
 
 	for _, tt := range tests {
