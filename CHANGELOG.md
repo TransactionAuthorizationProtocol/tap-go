@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-11
+
 ### Changed
 
 - **BREAKING** `Agent.For` (`for`) is enforced on the blockchain-address roles
@@ -32,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `partyType`, per [TAIP-6]. The previous `role` spelling matched no other
   implementation, so these messages were silently ignored by conformant peers.
   Inbound bodies still accept `role` as a fallback.
+
+### Fixed
+
+- An agent with no owner no longer serialises `"for": null`: `omitempty` has no
+  effect on a struct field, so the key was always written. `Agent.For` is now
+  tagged `omitzero` and the key is omitted. Unmarshalling `null` also stopped
+  producing a single empty DID.
 
 ### Added
 
