@@ -9,11 +9,25 @@ import (
 )
 
 // RejectBody represents the body of a TAP Reject message (TAIP-4).
+//
+// Reason is free text for people. Code is a machine-readable reason drawn from
+// the ISO 20022 ExternalStatusReason1Code list — the codes TAIP-19 maps a Reject
+// onto (pacs.002 RJCT) — so a receiver can act on why without parsing Reason.
+// Both are optional; a receiver that does not know a code ignores it.
 type RejectBody struct {
 	Context string `json:"@context"`
 	Type    string `json:"@type"`
 	Reason  string `json:"reason,omitempty"`
+	Code    string `json:"code,omitempty"`
 }
+
+// Reject codes (ISO 20022 ExternalStatusReason1Code).
+const (
+	// RejectCodeInvalidCreditorAccountNumber (AC03, "Creditor account number
+	// invalid or missing"): the beneficiary side does not hold the settlement
+	// address the transfer names.
+	RejectCodeInvalidCreditorAccountNumber = "AC03"
+)
 
 func (b *RejectBody) TAPType() string { return TypeReject }
 

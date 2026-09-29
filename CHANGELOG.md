@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `RejectBody.Code` (`code`): an optional machine-readable reason next to the
+  free-text `reason`, drawn from the ISO 20022 `ExternalStatusReason1Code` list
+  that [TAIP-19] maps a Reject onto. First value:
+  `RejectCodeInvalidCreditorAccountNumber` (`AC03`) — the beneficiary side does
+  not hold the settlement address. An empty code is omitted from the JSON, so a
+  Reject without one is unchanged on the wire.
+
 ## [0.8.0] - 2026-09-11
 
 ### Changed
@@ -48,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 [TAIP-5]: https://github.com/TransactionAuthorizationProtocol/TAIPs/blob/main/TAIPs/taip-5.md
 [TAIP-6]: https://github.com/TransactionAuthorizationProtocol/TAIPs/blob/main/TAIPs/taip-6.md
+[TAIP-19]: https://github.com/TransactionAuthorizationProtocol/TAIPs/blob/main/TAIPs/taip-19.md
 
 ## [0.7.0] - 2026-07-23
 

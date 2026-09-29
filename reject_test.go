@@ -3,6 +3,7 @@ package tap
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -88,5 +89,51 @@ func TestRejectBody_ParseBody(t *testing.T) {
 	}
 	if rb.Reason != "test" {
 		t.Errorf("Reason: got %q", rb.Reason)
+	}
+}
+
+// Code carries the ISO 20022 status reason next to the free-text reason, and is
+// left out entirely when unset so a Reject without one reads exactly as before.
+func TestRejectBody_Code(t *testing.T) {
+	cases := []struct {
+		name     string
+		body     RejectBody
+		wantJSON string
+	}{
+		{
+			name:     "code_round_trips",
+			body:     RejectBody{Reason: "Blockchain address is not ours", Code: RejectCodeInvalidCreditorAccountNumber},
+			wantJSON: `"code":"AC03"`,
+		},
+		{
+			name: "empty_code_is_omitted",
+			body: RejectBody{Reason: "Compliance check failed"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			msg, err := NewRejectMessage("from", []string{"to"}, "thid", &tc.body)
+			if err != nil {
+				t.Fatalf("create: %v", err)
+			}
+			raw := string(msg.Body)
+			if tc.wantJSON == "" && strings.Contains(raw, `"code"`) {
+				t.Fatalf("empty code must be omitted, got %s", raw)
+			}
+			if tc.wantJSON != "" && !strings.Contains(raw, tc.wantJSON) {
+				t.Fatalf("body %s does not contain %s", raw, tc.wantJSON)
+			}
+			parsed, err := ParseBody(msg)
+			if err != nil {
+				t.Fatalf("parse: %v", err)
+			}
+			rb, ok := parsed.(*RejectBody)
+			if !ok {
+				t.Fatalf("expected *RejectBody, got %T", parsed)
+			}
+			if rb.Code != tc.body.Code {
+				t.Errorf("Code: got %q, want %q", rb.Code, tc.body.Code)
+			}
+		})
 	}
 }
