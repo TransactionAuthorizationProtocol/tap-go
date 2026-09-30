@@ -2,9 +2,12 @@ package tap
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"strings"
 	"testing"
+
+	didcomm "github.com/notabene-id/go-didcomm"
 )
 
 func TestNewRejectMessage(t *testing.T) {
@@ -136,4 +139,49 @@ func TestRejectBody_Code(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Sending is strict: only a code this library defines goes out, so a typo or an
+// invented code fails at construction. Reading is lenient: an unknown code from
+// another implementation is kept for the receiver to ignore, not a parse error.
+func TestRejectCode_SendStrictReadLenient(t *testing.T) {
+	cases := []struct {
+		name    string
+		code    RejectCode
+		wantErr bool
+	}{
+		{name: "known_code_is_sent", code: RejectCodeInvalidCreditorAccountNumber},
+		{name: "no_code_is_sent", code: ""},
+		{name: "unknown_code_is_refused", code: "AC99", wantErr: true},
+		{name: "lowercase_known_code_is_refused", code: "ac03", wantErr: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := NewRejectMessage("from", []string{"to"}, "thid", &RejectBody{Reason: "r", Code: tc.code})
+			if tc.wantErr {
+				if !errors.Is(err, ErrInvalidBody) {
+					t.Fatalf("want ErrInvalidBody, got %v", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+
+	t.Run("unknown_code_is_kept_on_read", func(t *testing.T) {
+		msg := &didcomm.Message{
+			Type: TypeReject,
+			Body: json.RawMessage(`{"@context":"https://tap.rsvp/schema/1.0",` +
+				`"@type":"https://tap.rsvp/schema/1.0#Reject","reason":"r","code":"AC04"}`),
+		}
+		parsed, err := ParseBody(msg)
+		if err != nil {
+			t.Fatalf("parse: %v", err)
+		}
+		if got := parsed.(*RejectBody).Code; got != "AC04" {
+			t.Errorf("Code: got %q, want AC04", got)
+		}
+	})
 }

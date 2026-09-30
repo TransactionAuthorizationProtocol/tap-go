@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that [TAIP-19] maps a Reject onto. First value:
   `RejectCodeInvalidCreditorAccountNumber` (`AC03`) — the beneficiary side does
   not hold the settlement address. An empty code is omitted from the JSON, so a
-  Reject without one is unchanged on the wire.
+  Reject without one is unchanged on the wire. `NewRejectMessage` refuses a code
+  this library does not define (`ErrInvalidBody`); `ParseBody` keeps any code, so
+  a receiver can ignore one it does not know.
 
 ## [0.8.0] - 2026-09-11
 
