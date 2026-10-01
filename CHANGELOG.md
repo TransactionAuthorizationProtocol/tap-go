@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-01
+
 ### Added
 
 - `RejectBody.Code` (`code`): an optional machine-readable reason next to the
