@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-05
+
 ### Added
 
 - `RejectCodeInconsistentWithEndCustomer` (`BE01`): the party details do not
