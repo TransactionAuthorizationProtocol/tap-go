@@ -32,13 +32,19 @@ const (
 	// invalid or missing"): the beneficiary side does not hold the settlement
 	// address the transfer names.
 	RejectCodeInvalidCreditorAccountNumber RejectCode = "AC03"
+	// RejectCodeInconsistentWithEndCustomer (BE01, "Identification of end
+	// customer is not consistent with associated account number, organisation
+	// ID or private ID"): the party details do not match the rejecting side's
+	// customer, such as a beneficiary name that does not match the account
+	// holder.
+	RejectCodeInconsistentWithEndCustomer RejectCode = "BE01"
 )
 
 // Known reports whether c is a code this library sends; the empty code (no
 // code) counts as known.
 func (c RejectCode) Known() bool {
 	switch c {
-	case "", RejectCodeInvalidCreditorAccountNumber:
+	case "", RejectCodeInvalidCreditorAccountNumber, RejectCodeInconsistentWithEndCustomer:
 		return true
 	}
 	return false
