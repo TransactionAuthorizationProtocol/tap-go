@@ -151,6 +151,7 @@ func TestRejectCode_SendStrictReadLenient(t *testing.T) {
 		wantErr bool
 	}{
 		{name: "known_code_is_sent", code: RejectCodeInvalidCreditorAccountNumber},
+		{name: "name_mismatch_code_is_sent", code: RejectCodeInconsistentWithEndCustomer},
 		{name: "no_code_is_sent", code: ""},
 		{name: "unknown_code_is_refused", code: "AC99", wantErr: true},
 		{name: "lowercase_known_code_is_refused", code: "ac03", wantErr: true},

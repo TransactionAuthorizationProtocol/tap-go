@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `RejectCodeInconsistentWithEndCustomer` (`BE01`): the party details do not
+  match the rejecting side's customer, such as a beneficiary name that does not
+  match the account holder.
+
 ## [0.9.0] - 2026-10-01
 
 ### Added
